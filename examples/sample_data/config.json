@@ -1,0 +1,27 @@
+{
+    "person_fields": [
+        "age",
+        "sex",
+        "individual_income"
+    ],
+    "household_fields": [
+        "num_people",
+        "household_income",
+        "num_vehicles"
+    ],
+    "preprocessing": {
+        "individual_income": {
+            "bins": [
+                0,
+                20000,
+                40000,
+                80000,
+                100000
+            ]
+        }
+    },
+    "network_config_files": {
+        "person": "sample_data/sample_person_bn.json",
+        "household": "sample_data/sample_household_bn.json"
+    }
+}

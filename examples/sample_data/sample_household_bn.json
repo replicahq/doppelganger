@@ -1,0 +1,17 @@
+{
+    "type": "household",
+    "nodes": [
+        "num_people",
+        "household_income",
+        "num_vehicles"
+    ],
+    "edges": {
+        "num_people": [
+            "household_income",
+            "num_vehicles"
+        ],
+        "household_income": [
+            "num_vehicles"
+        ]
+    }
+}

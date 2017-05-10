@@ -1,0 +1,12 @@
+{
+    "type": "person",
+    "nodes": [
+        "age",
+        "sex",
+        "income"
+    ],
+    "edges": {
+        "age": ["sex", "income"],
+        "sex": ["income"]
+    }
+}
