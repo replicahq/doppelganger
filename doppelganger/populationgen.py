@@ -32,8 +32,13 @@ class Population(object):
         """Creates a generator in the pythonic sense yielding
          (serial number, evidence, segment)
         """
+        serialnos = set()
         for _, row in allocated_rows.iterrows():
             serialno = row[inputs.SERIAL_NUMBER.name]
+            if serialno in serialnos:
+                # Don't generate more than once for the same serial number
+                continue
+            serialnos.add(serialno)
             evidence = tuple((field, row[field]) for field in fields)
             segment = segmenter(row)
             yield serialno, evidence, segment
