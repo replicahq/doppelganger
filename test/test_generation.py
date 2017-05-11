@@ -2,7 +2,7 @@ from __future__ import (
     absolute_import, division, print_function, unicode_literals
 )
 
-from mock import MagicMock
+from mock import MagicMock, patch
 
 import unittest
 import pandas
@@ -90,3 +90,20 @@ class TestPopulationGen(unittest.TestCase):
 
         self.assertIn(inputs.NUM_PEOPLE.name, population.generated_households)
         self._check_output(population.generated_households)
+
+    def test_read_from_file(self):
+        read_csv = MagicMock(return_value=pandas.DataFrame())
+        with patch('pandas.read_csv', read_csv):
+            population = Population.from_csvs('persons_file', 'households_file')
+        assert type(population) == Population
+        read_csv.assert_any_call('households_file')
+        read_csv.assert_any_call('persons_file')
+
+    def test_write_to_file(self):
+        persons = MagicMock()
+        households = MagicMock()
+        population = Population(persons, households)
+
+        population.write(persons_outfile='persons_file', households_outfile='households_file')
+        persons.to_csv.assert_called_once_with('persons_file')
+        households.to_csv.assert_called_once_with('households_file')

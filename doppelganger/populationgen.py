@@ -10,18 +10,20 @@ from doppelganger import inputs
 class Population(object):
 
     @staticmethod
-    def from_csv(infile):
+    def from_csvs(persons_infile, households_infile):
         """Load generated population from file.
 
         Args:
-            infile (unicode): path to csv
+            persons_infile (unicode): path to persons csv
+            households_infile (unicode): path to households csv
 
         Returns:
             Population: generated population
 
         """
-        generated_people = pandas.read_csv(infile)
-        return Population(generated_people)
+        generated_people = pandas.read_csv(persons_infile)
+        generated_households = pandas.read_csv(households_infile)
+        return Population(generated_people, generated_households)
 
     def __init__(self, generated_people, generated_households):
         self.generated_people = generated_people
@@ -94,6 +96,5 @@ class Population(object):
             outfile (unicode): path to write to
 
         """
-
         self.generated_people.to_csv(persons_outfile)
         self.generated_households.to_csv(households_outfile)
