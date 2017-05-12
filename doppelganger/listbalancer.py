@@ -8,11 +8,6 @@ import cvxpy as cvx
 import numpy as np
 
 
-# Constants for Newton-Raphson list balancer
-MAX_GAP = 0.0000001
-MAX_ITERATIONS = 10000
-
-
 def balance_cvx(hh_table, A, w, mu=None, verbose_solver=False):
     """Maximum Entropy allocaion method for a single unit
 
@@ -107,7 +102,7 @@ def balance_multi_cvx(
     # Relative weights of tracts
     # (need to reshape for numpy broadcasting)
     wa = (np.sum(A, axis=1) / np.sum(A)).reshape(-1, 1)
-    w = (np.array(w) * np.array(wa))
+    w_relative = (np.array(w) * np.array(wa))
 
     # With relaxation factors
     z = cvx.Variable(n_controls, n_tracts)
@@ -120,7 +115,7 @@ def balance_multi_cvx(
     while not solved:
         objective = cvx.Maximize(
             cvx.sum_entries(
-                cvx.entr(x) + cvx.mul_elemwise(cvx.log(np.e * w), x)
+                cvx.entr(x) + cvx.mul_elemwise(cvx.log(np.e * w_relative), x)
             ) +
             cvx.sum_entries(
                 cvx.mul_elemwise(
@@ -143,7 +138,6 @@ def balance_multi_cvx(
         ]
 
         prob = cvx.Problem(objective, constraints)
-        prob.solve(verbose=verbose_solver)
 
         try:
             prob.solve(verbose=verbose_solver)
@@ -175,85 +169,6 @@ def balance_multi_cvx(
         zs_out = np.insert(z.value, zero_marginals, zero_weights.T, 1)
 
     return weights_out, zs_out, qs_out
-
-
-def balance_newton(hh_table, A, w, mu):
-    """Newton-Raphson list balancer for single unit
-
-    Args:
-        hh_table (numpy matrix): table of households categorical data
-        A (numpy matrix): marginals (controls)
-        w (numpy array): initial household allocation weights
-        mu (numpy array) importance weights for controls
-
-    Returns:
-        (numpy matrix, numpy matrix, numpy matrix): Household weights,
-            relaxation factors
-    """
-
-    n_samples, n_controls = hh_table.shape
-
-    sample_weight_lower = w / 5
-    sample_weight_upper = w * 5
-
-    alpha = np.ones(n_controls)
-
-    # Initial relaxation factors
-    z = np.ones(n_controls)
-
-    # Set current and previous weights
-    cur_w = np.copy(w)
-    prev_w = np.copy(w)
-
-    for it in range(MAX_ITERATIONS):
-        for index, marginal in np.ndenumerate(A):
-            # Calculate balancing factor
-            marginal_ind = index[1]
-            control_weight = mu[0, marginal_ind]
-
-            data_col = np.reshape(hh_table[:, marginal_ind], (n_samples, 1))
-
-            x = np.dot(prev_w.T, data_col)
-            y = np.dot(prev_w.T, np.power(data_col, 2))
-
-            if x > 0.0:
-                if marginal > 0.0:
-                    numer = x - (A[0, marginal_ind] * z[marginal_ind])
-                    denom = y + (
-                        A[0, marginal_ind] * z[marginal_ind] *
-                        (1 / control_weight)
-                    )
-                    alpha[marginal_ind] = 1 - (numer / denom)
-
-                else:
-                    alpha[marginal_ind] = 0.01
-            else:
-                alpha[marginal_ind] = 1.0
-
-            # Update HH weights
-            for sample_ind in range(n_samples):
-                if hh_table[sample_ind, marginal_ind] > 0.0:
-
-                    cur_w[sample_ind] = prev_w[sample_ind] * \
-                        alpha[marginal_ind]**hh_table[sample_ind, marginal_ind]
-                    cur_w[sample_ind] = max(
-                        cur_w[sample_ind], sample_weight_lower[sample_ind]
-                    )
-                    cur_w[sample_ind] = min(
-                        cur_w[sample_ind], sample_weight_upper[sample_ind]
-                    )
-
-            # Update relaxation factors
-            z[marginal_ind] = z[marginal_ind] * (1 / alpha[marginal_ind])**(1 / control_weight)
-
-        # Check for convergence and break
-        weight_diff = np.sum(np.absolute(cur_w - prev_w)) / cur_w.size
-        if weight_diff <= MAX_GAP:
-            break
-
-        prev_w = cur_w.copy()
-
-    return cur_w, z
 
 
 def discretize_multi_weights(hh_table, x, gamma=100., verbose_solver=False):

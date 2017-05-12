@@ -30,16 +30,51 @@ class ListBalancerTests(unittest.TestCase):
             151.,
             429.
         ]])
-        n_samples, n_controls = hh_table.shape
+        _, n_controls = hh_table.shape
 
         expected_weights = np.matrix([
             [81.],
             [101.],
-            [429.],
-            [580.]
+            [151.],
+            [429.]
         ])
 
-        return (hh_table, A, w, expected_weights)
+        mu = np.mat([1] * n_controls)
+
+        return (hh_table, A, w, mu, expected_weights)
+
+    def _mock_list_relaxed(self):
+        hh_table = np.mat([
+            [1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 1],
+            [0, 0, 0, 1, 1]
+        ])
+        A = np.mat([
+            81.,
+            101.,
+            151.,
+            429.,
+            580.,
+        ])
+        w = np.matrix([[
+            81.,
+            101.,
+            151.,
+            429.
+        ]])
+        _, n_controls = hh_table.shape
+
+        expected_weights = np.matrix([
+            [45.],
+            [52.],
+            [65.],
+            [98.]
+        ])
+
+        mu = np.mat([1] * n_controls)
+
+        return (hh_table, A, w, mu, expected_weights)
 
     def _mock_list_inconsistent(self):
         hh_table = np.mat([
@@ -61,7 +96,39 @@ class ListBalancerTests(unittest.TestCase):
              101.,
              49.]
         ])
-        n_samples, n_controls = hh_table.shape
+        _, n_controls = hh_table.shape
+        mu = np.mat([1] * n_controls)
+
+        expected_weights = np.matrix([
+            [70.66,
+             88.66,
+             85.47,
+             45.72]
+        ])
+
+        return (hh_table, A, w, mu, expected_weights)
+
+    def _mock_list_infeasible(self):
+        hh_table = np.mat([
+            [1, 0, 0, 1, 0],
+            [0, 1, 0, 1, 1],
+            [0, 0, 1, 2, 1],
+            [0, 0, 1, 1, 2]
+        ])
+        A = np.mat([
+            81.,
+            101.,
+            151.,
+            429.,
+            299.,
+        ])
+        w = np.matrix([
+            [1000.,
+             0.,
+             0.,
+             0.]
+        ])
+        _, n_controls = hh_table.shape
         mu = np.mat([1] * n_controls)
 
         expected_weights = np.matrix([
@@ -90,7 +157,7 @@ class ListBalancerTests(unittest.TestCase):
             [0., 0., 0., 0.],
             [79., 99., 101., 49.]
         ])
-        n_samples, n_controls = hh_table.shape
+        _, n_controls = hh_table.shape
         mu = np.mat(np.ones((2, n_controls)))
 
         expected_weights = np.matrix([
@@ -118,11 +185,16 @@ class ListBalancerTests(unittest.TestCase):
         return hh_table, hh_weights, expected_hh_discretized
 
     def test_balance_cvx(self):
-        hh_table, A, w, expected_weights = self._mock_list_consistent()
-        n_samples, n_controls = hh_table.shape
+        hh_table, A, w, _, expected_weights = self._mock_list_consistent()
         hh_weights = listbalancer.balance_cvx(hh_table, A, w)
         np.testing.assert_allclose(
-            hh_weights, expected_weights, rtol=1, atol=0)
+            hh_weights, expected_weights, rtol=0.01, atol=0)
+
+    def test_balance_cvx_relaxed(self):
+        hh_table, A, w, mu, expected_weights = self._mock_list_relaxed()
+        hh_weights, _ = listbalancer.balance_cvx(hh_table, A, w, mu)
+        np.testing.assert_allclose(
+            hh_weights, expected_weights, rtol=0.01, atol=0)
 
     def test_balance_multi_cvx(self):
         hh_table, A, w, mu, expected_weights = self._mock_list_inconsistent()
@@ -137,43 +209,56 @@ class ListBalancerTests(unittest.TestCase):
             np.tile(expected_weights, (n_tracts, 1)))
         gamma = 1000.
         meta_gamma = 1000.
-        hh_weights, z, q = listbalancer.balance_multi_cvx(
+        hh_weights, _, _ = listbalancer.balance_multi_cvx(
             hh_table, A_extend, B, w_extend, gamma * mu_extend.T, meta_gamma
         )
         np.testing.assert_allclose(
-            hh_weights, expected_weights_extend, rtol=1, atol=0)
+            hh_weights, expected_weights_extend, rtol=0.01, atol=0)
+
+    def test_balance_multi_cvx_infeasible(self):
+        hh_table, A, w, mu, expected_weights = self._mock_list_infeasible()
+
+        # Extend the data
+        n_tracts = 10
+        A_extend = np.mat(np.tile(A, (n_tracts, 1)))
+        w_extend = np.mat(np.tile(w, (n_tracts, 1)))
+        mu_extend = np.mat(np.tile(mu, (n_tracts, 1)))
+        B = np.mat(np.dot(np.ones((1, n_tracts)), A_extend)[0])
+        gamma = 10.
+        meta_gamma = 1000.
+        hh_weights, _, _ = listbalancer.balance_multi_cvx(
+            hh_table, A_extend, B, w_extend, gamma * mu_extend.T, meta_gamma
+        )
+        np.testing.assert_allclose(
+            hh_weights, w_extend, rtol=0.01, atol=0)
 
     def test_balance_multi_trust_initial(self):
-        # TODO: Set mock values so this is meaningful
-        hh_table, A, w, mu, expected_weights = self._mock_list_inconsistent()
+        hh_table, A, w, mu, _ = self._mock_list_inconsistent()
         B = np.mat(np.dot(np.ones((1, 1)), A)[0])
         gamma = 1.
-        hh_weights, z, q = listbalancer.balance_multi_cvx(
+        hh_weights, _, _ = listbalancer.balance_multi_cvx(
             hh_table, A, B, w, gamma * mu.T
         )
-
         np.testing.assert_allclose(
             hh_weights, w, rtol=0.05, atol=0)
 
     def test_balance_multi_trust_controls(self):
-        # TODO: Set mock values so this is meaningful
-        hh_table, A, w, mu, expected_weights = self._mock_list_inconsistent()
+        hh_table, A, w, mu, expected_weights = self._mock_list_consistent()
         B = np.mat(np.dot(np.ones((1, 1)), A)[0])
-        gamma = 10000.
-        hh_weights, z, q = listbalancer.balance_multi_cvx(
+        gamma = 100000.
+        hh_weights, _, _ = listbalancer.balance_multi_cvx(
             hh_table, A, B, w, gamma * mu.T
         )
         np.testing.assert_allclose(
-            hh_weights, expected_weights, rtol=0.05, atol=0)
+            hh_weights, expected_weights.T, rtol=0.05, atol=0)
 
     def test_balance_multi_zero_marginal(self):
         hh_table, A, w, mu, expected_weights = \
             self._mock_list_infeasible_marginal()
         n_tracts = A.shape[0]
         B = np.mat(np.dot(np.ones((1, n_tracts)), A)[0])
-
         gamma = 10000.
-        hh_weights, z, q = listbalancer.balance_multi_cvx(
+        hh_weights, _, _ = listbalancer.balance_multi_cvx(
             hh_table, A, B, w, gamma * mu.T
         )
 
