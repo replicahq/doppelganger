@@ -21,7 +21,8 @@ class TestPopulationGen(unittest.TestCase):
                 'individual_income': income
             }
         allocated_persons = pandas.DataFrame([
-            mock_person('b', '35-64', 'F', '40k+')
+            mock_person('b', '35-64', 'F', '40k+'),
+            mock_person('b', '35-64', 'M', 'None'),
         ])
 
         def mock_household(serialno, num_people, num_vehicles, income, count, tract):
@@ -47,12 +48,19 @@ class TestPopulationGen(unittest.TestCase):
             return_value=generated)
         return model
 
-    def _check_output(self, dataframe):
+    def _check_household_output(self, dataframe):
         self.assertSequenceEqual(
             dataframe['tract'].tolist(), ('tract1', 'tract1', 'tract2', 'tract2'))
         self.assertSequenceEqual(
             dataframe[inputs.SERIAL_NUMBER.name].tolist(), ('b', 'b', 'b', 'b'))
         self.assertSequenceEqual(dataframe['repeat_index'].tolist(), (0, 1, 0, 1))
+
+    def _check_person_output(self, dataframe):
+        self.assertSequenceEqual(
+            dataframe['tract'].tolist(), ('tract1', 'tract1', 'tract2', 'tract2',
+                                          'tract1', 'tract1', 'tract2', 'tract2'))
+        self.assertSequenceEqual(dataframe['repeat_index'].tolist(), (0, 1, 0, 1, 0, 1, 0, 1))
+        self.assertSequenceEqual(dataframe[inputs.AGE.name].tolist(), ['35-64'] * 8)
 
     def test_generate_persons_simple(self):
         person_model = self._mock_model(
@@ -64,15 +72,11 @@ class TestPopulationGen(unittest.TestCase):
         population = Population.generate(
             allocations, person_model, MagicMock())
 
-        evidence = ((inputs.AGE.name, '35-64'), (inputs.SEX.name, 'F'))
+        evidence = ((inputs.AGE.name, '35-64'), (inputs.SEX.name, 'M'))
 
         person_model.generate.assert_called_with(
             'one_bucket', evidence, count=2)
-        self._check_output(population.generated_people)
-        self.assertSequenceEqual(
-            population.generated_people[
-                inputs.AGE.name].tolist(), ['35-64'] * 4
-        )
+        self._check_person_output(population.generated_people)
 
     def test_generate_households_simple(self):
         household_model = self._mock_model(
@@ -89,7 +93,7 @@ class TestPopulationGen(unittest.TestCase):
             'one_bucket', evidence, count=2)
 
         self.assertIn(inputs.NUM_PEOPLE.name, population.generated_households)
-        self._check_output(population.generated_households)
+        self._check_household_output(population.generated_households)
 
     def test_read_from_file(self):
         read_csv = MagicMock(return_value=pandas.DataFrame())
