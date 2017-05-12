@@ -6,6 +6,7 @@ import unittest
 import math
 
 import pandas
+from mock import patch
 import numpy
 
 from doppelganger import (
@@ -209,6 +210,17 @@ class BayesNetTests(unittest.TestCase):
         age_index = self._person_fields().index(inputs.AGE.name)
         self.assertEqual(person[age_index], '65+')
 
+    def test_update_missing_iterations_inertia(self):
+        _, person_model = self._mock_household_collection()
+        missing_data = self._mock_persons_missing()
+        training_data = bayesnets.SegmentedData.from_data(
+            missing_data, self._person_fields(), segmenter=self._person_segmenter(),
+        )
+        person_model.update(training_data, max_iterations=5, inertia=.5)
+        person = person_model.generate(self._two_person_house(), ((str('age'), str('65+')),),)[0]
+        age_index = self._person_fields().index(inputs.AGE.name)
+        self.assertEqual(person[age_index], '65+')
+
     def test_prior_creation(self):
         all_values = bayesnets.generate_laplace_prior_data(
             (inputs.AGE.name, inputs.SEX.name), Preprocessor())
@@ -299,3 +311,25 @@ class BayesNetTests(unittest.TestCase):
         _check_dataframe(
             dataframes['1'][2], expected_columns, [[1.], [1.]], expected_rows
         )
+
+    def test_read_write(self):
+        household_model, _ = self._mock_household_collection()
+
+        def _check_network(household_model_new):
+            self.assertSequenceEqual(household_model.fields, household_model_new.fields)
+            self._check_household_generate(household_model_new)
+
+        with patch('__builtin__.open') as open_mock:
+            household_model.write('file')
+            open_mock.assert_called_once_with('file', 'w')
+            # Check that correct json is written
+            json_net = open_mock.return_value.__enter__.return_value.write.call_args[0][0]
+            household_model_new = BayesianNetworkModel.from_json(
+                json_net, self._household_segmenter())
+            _check_network(household_model_new)
+
+            # Check that json is correctly read
+            open_mock.return_value.__enter__.return_value.read.return_value = json_net
+            household_model_new = BayesianNetworkModel.from_file(
+                'file', self._household_segmenter())
+            _check_network(household_model_new)

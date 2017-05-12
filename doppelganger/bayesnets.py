@@ -253,7 +253,9 @@ class BayesianNetworkModel(object):
                 return False
             assert len(old) == len(new)
             for i in xrange(len(old)):
-                if old[i] != new[i]:
+                # Compare as tuple because numpy arrays return an array
+                # of bools instead of a bool on comparison.
+                if tuple(old[i]) != tuple(new[i]):
                     return False
             return True
 
