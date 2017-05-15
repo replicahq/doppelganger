@@ -1,12 +1,16 @@
 {
-    "type": "person",
-    "nodes": [
-        "age",
-        "sex",
-        "income"
+  "type": "person",
+  "nodes": [
+    "age",
+    "sex",
+    "income"
+  ],
+  "edges": {
+    "age": [
+      "income"
     ],
-    "edges": {
-        "age": ["sex", "income"],
-        "sex": ["income"]
-    }
+    "sex": [
+      "income"
+    ]
+  }
 }
