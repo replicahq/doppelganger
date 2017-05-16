@@ -108,4 +108,4 @@ class TestConfig(unittest.TestCase):
         correct_set = set(tuple(set(
             field.name for field in allocation.DEFAULT_HOUSEHOLD_FIELDS).union(
                 set(configuration_household_fields))))
-        np.testing.assert_equal(combined_set, correct_set)
+        self.assertEqual(combined_set, correct_set)
