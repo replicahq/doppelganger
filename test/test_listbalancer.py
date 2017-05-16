@@ -132,10 +132,7 @@ class ListBalancerTests(unittest.TestCase):
         mu = np.mat([1] * n_controls)
 
         expected_weights = np.matrix([
-            [81.,
-             101.,
-             100.,
-             51.]
+            [100.,    0.,    0.,    0.]
         ])
 
         return (hh_table, A, w, mu, expected_weights)
@@ -145,24 +142,29 @@ class ListBalancerTests(unittest.TestCase):
             [0, 1, 0, 0],
             [0, 0, 1, 0],
             [0, 0, 0, 1],
-            [0, 0, 0, 1]
+            [0, 0, 0, 1],
+            [0, 0, 1, 1],
         ])
         A = np.mat([
-            [0, 324.],
-            [0, 357.],
-            [0, 138.],
-            [0, 183]
+            [0., 324., 0, 0.],
+            [0., 357., 0, 0.],
+            [0., 138., 0., 0.],
+            [0., 183., 0., 0.],
         ]).T
         w = np.matrix([
-            [0., 0., 0., 0.],
-            [79., 99., 101., 49.]
+            [0., 0., 0., 0., 0.],
+            [79., 99., 101., 49., 200],
+            [0., 0., 0., 0., 0],
+            [0., 0., 0., 0., 0],
         ])
         _, n_controls = hh_table.shape
         mu = np.mat(np.ones((2, n_controls)))
 
         expected_weights = np.matrix([
-            [0., 0., 0., 0.],
-            [340.45637778, 137.42776531, 122.81489579, 59.58339833]
+            [0., 0., 0., 0., 0.],
+            [340.46, 58.09, 69.56, 33.75, 80.83],
+            [0., 0., 0., 0., 0.],
+            [0., 0., 0., 0., 0.],
         ])
 
         return (hh_table, A, w, mu, expected_weights)
@@ -181,6 +183,25 @@ class ListBalancerTests(unittest.TestCase):
         expected_hh_discretized = np.mat([
             [1, 1, 1, 0],
             [1, 1, 1, 0],
+        ])
+        return hh_table, hh_weights, expected_hh_discretized
+
+    def _mock_hh_weights_zeroed(self):
+        hh_table = np.mat([
+            [1, 0, 0, 1, 0],
+            [0, 1, 0, 1, 1],
+            [0, 0, 1, 2, 1],
+            [0, 0, 1, 1, 2]
+        ])
+        hh_weights = np.mat([
+            [0., 0., 0., 0.],
+            [80.79, 100.6, 100.7, 49.32],
+            [0., 0., 0., 0.],
+        ])
+        expected_hh_discretized = np.mat([
+            [0, 0, 0, 0],
+            [1, 1, 1, 0],
+            [0, 0, 0, 0],
         ])
         return hh_table, hh_weights, expected_hh_discretized
 
@@ -210,8 +231,7 @@ class ListBalancerTests(unittest.TestCase):
         gamma = 1000.
         meta_gamma = 1000.
         hh_weights, _, _ = listbalancer.balance_multi_cvx(
-            hh_table, A_extend, B, w_extend, gamma * mu_extend.T, meta_gamma
-        )
+            hh_table, A_extend, B, w_extend, gamma * mu_extend.T, meta_gamma)
         np.testing.assert_allclose(
             hh_weights, expected_weights_extend, rtol=0.01, atol=0)
 
@@ -222,6 +242,7 @@ class ListBalancerTests(unittest.TestCase):
         n_tracts = 10
         A_extend = np.mat(np.tile(A, (n_tracts, 1)))
         w_extend = np.mat(np.tile(w, (n_tracts, 1)))
+        expected_weights_extend = np.mat(np.tile(expected_weights, (n_tracts, 1)))
         mu_extend = np.mat(np.tile(mu, (n_tracts, 1)))
         B = np.mat(np.dot(np.ones((1, n_tracts)), A_extend)[0])
         gamma = 10.
@@ -230,7 +251,7 @@ class ListBalancerTests(unittest.TestCase):
             hh_table, A_extend, B, w_extend, gamma * mu_extend.T, meta_gamma
         )
         np.testing.assert_allclose(
-            hh_weights, w_extend, rtol=0.01, atol=0)
+            hh_weights, expected_weights_extend, rtol=0.01, atol=0)
 
     def test_balance_multi_trust_initial(self):
         hh_table, A, w, mu, _ = self._mock_list_inconsistent()
@@ -261,12 +282,18 @@ class ListBalancerTests(unittest.TestCase):
         hh_weights, _, _ = listbalancer.balance_multi_cvx(
             hh_table, A, B, w, gamma * mu.T
         )
-
         np.testing.assert_allclose(
             hh_weights, expected_weights, rtol=0.05, atol=0)
 
     def test_discretize_multi_weights(self):
         hh_table, hh_weights, expected_hh_discretized = self._mock_hh_weights()
+        hh_discretized = listbalancer.discretize_multi_weights(
+            hh_table, hh_weights)
+        np.testing.assert_array_equal(
+            hh_discretized, expected_hh_discretized)
+
+    def test_discretize_multi_zero_weights(self):
+        hh_table, hh_weights, expected_hh_discretized = self._mock_hh_weights_zeroed()
         hh_discretized = listbalancer.discretize_multi_weights(
             hh_table, hh_weights)
         np.testing.assert_array_equal(
