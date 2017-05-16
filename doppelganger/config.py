@@ -5,6 +5,8 @@ from __future__ import (
 import json
 from doppelganger import bayesnets
 
+CURRENT_VERSION = '0'
+
 
 class Configuration(object):
     """A configuration to population generation.
@@ -18,13 +20,15 @@ class Configuration(object):
                  person_fields,
                  household_structure,
                  person_structure,
-                 preprocessing_config
+                 preprocessing_config,
+                 version
                  ):
         self.person_fields = person_fields
         self.household_fields = household_fields
         self.person_structure = person_structure
         self.household_structure = household_structure
         self.preprocessing_config = preprocessing_config
+        self.version = version
 
     @staticmethod
     def _read_net_structure(filename):
@@ -43,6 +47,11 @@ class Configuration(object):
 
         Returns: Configuration to be used in population generation.
         """
+
+        assert 'version' in config_json, "The config file is missing a 'version' field"
+        assert config_json['version'] == CURRENT_VERSION, \
+            "The config file version is incorrect. \
+            Please upgrade your config file to version {}.".format(CURRENT_VERSION)
         network_configs = config_json['network_config_files']
         household_structure = Configuration._read_net_structure(
             network_configs['household'])
@@ -51,12 +60,14 @@ class Configuration(object):
         household_fields = tuple(config_json['household_fields'])
         person_fields = tuple(config_json['person_fields'])
         preprocessing = config_json['preprocessing']
+        version = config_json['version']
         return Configuration(
             household_fields,
             person_fields,
             household_structure,
             person_structure,
-            preprocessing
+            preprocessing,
+            version
         )
 
     @staticmethod
