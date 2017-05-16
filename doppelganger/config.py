@@ -71,3 +71,21 @@ class Configuration(object):
         with open(infile) as training_config_file:
             config_json = json.loads(training_config_file.read())
             return Configuration.from_json(config_json)
+
+    @staticmethod
+    def get_combined_config_and_default_fields(allocation_default_housedold_fields,
+                                               configuration_household_fields):
+        """Create a tuple of combined config and the default fields.
+
+        Args:
+            allocation_default_housedold_fields (set): a set of
+                allocation default housedold fields
+            configuration_household_fields (list): a list of strings
+                of configuration household fields
+
+        Returns: Combination of allocation default housedold
+            fields and configuration household fields
+        """
+        default_set = set(field.name for field in allocation_default_housedold_fields)
+        config_set = set(configuration_household_fields)
+        return tuple(default_set.union(config_set))
