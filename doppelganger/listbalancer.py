@@ -8,6 +8,29 @@ import cvxpy as cvx
 import numpy as np
 
 
+def _insert_append(arr, indices, values, axis=0):
+    """Insert / Append values to array along given axis
+
+    Args:
+    arr (numpy array): Array to insert/append values
+    indices (list(int)): indices before which values is inserted
+    values (numpy array): Values to insert into arr
+    axis (int): Axis along which to insert values
+
+    Returns:
+    numpy array: A copy of arr with values inserted and appended
+    """
+    insert_filter = indices < arr.shape[axis]
+    insert_inds = indices[insert_filter]
+    n_append = indices[~insert_filter].shape[0]
+    append_shape = (1, n_append) if axis else (n_append, 1)
+    arr_append = np.tile(values, append_shape)
+
+    arr_update = np.insert(arr, insert_inds, values, axis=axis)
+    arr_update = np.concatenate((arr_update, arr_append), axis=axis)
+    return arr_update
+
+
 def balance_cvx(hh_table, A, w, mu=None, verbose_solver=False):
     """Maximum Entropy allocaion method for a single unit
 
@@ -83,7 +106,7 @@ def balance_multi_cvx(
 
     # Solver won't converge with zero marginals. Identify and remove.
     zero_marginals = np.where(~A.any(axis=1))[0]
-    zero_weights = np.zeros((1, n_controls))
+    zero_weights = np.zeros((1, n_samples))
 
     if zero_marginals.size:
         logging.info(
@@ -155,18 +178,23 @@ def balance_multi_cvx(
             'Solver error encountered. Importance weights have been relaxed.')
 
     if not np.any(x.value):
-        logging.info(
+        logging.exception(
             'Solution infeasible. Using initial weights.')
 
     # If we didn't get a value return the initial weights
-    weights_out = x.value if np.any(x.value) else w
+    weights_out = x.value if np.any(x.value) else w_relative
     zs_out = z.value
     qs_out = q.value
 
     # Insert zeros
     if zero_marginals.size:
-        weights_out = np.insert(weights_out, zero_marginals, zero_weights, 0)
-        zs_out = np.insert(z.value, zero_marginals, zero_weights.T, 1)
+        # Due to numpy insert behavior, we need to differentiate between the
+        # values that go into the middle of the array, and the values that get
+        # appended
+        weights_out = _insert_append(
+            weights_out, zero_marginals, zero_weights, axis=0)
+        zs_out = _insert_append(
+            z.value, zero_marginals, np.zeros((n_controls, 1)), axis=1)
 
     return weights_out, zs_out, qs_out
 
@@ -185,6 +213,20 @@ def discretize_multi_weights(hh_table, x, gamma=100., verbose_solver=False):
     """
 
     n_samples, n_controls = hh_table.shape
+
+    # Solver won't converge with zero weights. Identify and remove.
+    zero_weights_inds = np.where(~x.any(axis=1))[0]
+    zero_weights = np.zeros((1, n_samples))
+
+    if zero_weights_inds.size:
+        logging.info(
+            '{} tract(s) with zero weight rows encountered. '
+            'Setting weights to zero'.format(zero_weights_inds.size)
+        )
+
+        # Need to remove problem tracts and add a row of zeros later
+        x = np.delete(x, zero_weights_inds, axis=0)
+
     n_tracts = x.shape[0]
 
     # Integerize x values
@@ -207,8 +249,8 @@ def discretize_multi_weights(hh_table, x, gamma=100., verbose_solver=False):
     objective = cvx.Maximize(
         cvx.sum_entries(
             cvx.sum_entries(cvx.mul_elemwise(x_log, y), axis=1) -
-            (gamma - 1) * cvx.sum_entries(U, axis=1) -
-            (gamma - 1) * cvx.sum_entries(V, axis=1)
+            (gamma) * cvx.sum_entries(U, axis=1) -
+            (gamma) * cvx.sum_entries(V, axis=1)
         )
     )
 
@@ -222,7 +264,19 @@ def discretize_multi_weights(hh_table, x, gamma=100., verbose_solver=False):
     ]
 
     prob = cvx.Problem(objective, constraints)
-    prob.solve(verbose=verbose_solver)
+
+    try:
+        prob.solve(verbose=verbose_solver)
+
+    except cvx.SolverError:
+        logging.exception(
+            'Solver error encountered in weight discretization. Weights will be rounded.')
+
+    weights_out = y.value if np.any(y.value) else x_residuals
+
+    # Insert zeros
+    if zero_weights_inds.size:
+        weights_out = _insert_append(weights_out, zero_weights_inds, zero_weights, axis=0)
 
     # Make results binary and return
-    return np.array(y.value > 0.5).astype(int)
+    return np.array(weights_out > 0.5).astype(int)
