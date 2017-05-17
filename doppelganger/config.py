@@ -3,7 +3,7 @@ from __future__ import (
 )
 
 import json
-from doppelganger import bayesnets
+from doppelganger import (bayesnets, allocation)
 
 CURRENT_VERSION = '0'
 
@@ -82,3 +82,25 @@ class Configuration(object):
         with open(infile) as training_config_file:
             config_json = json.loads(training_config_file.read())
             return Configuration.from_json(config_json)
+
+    def get_all_person_fields(self):
+        """Create a tuple of combined config and the default person fields.
+
+        Returns: Combination of allocation default person
+            fields and configuration person fields as tuple
+        """
+
+        default_set = set(field.name for field in allocation.DEFAULT_PERSON_FIELDS)
+        config_set = set(self.person_fields)
+        return tuple(default_set.union(config_set))
+
+    def get_all_household_fields(self):
+        """Create a tuple of combined config and the default household fields.
+
+        Returns: Combination of allocation default household
+            fields and configuration household fields as tuple
+        """
+
+        default_set = set(field.name for field in allocation.DEFAULT_HOUSEHOLD_FIELDS)
+        config_set = set(self.household_fields)
+        return tuple(default_set.union(config_set))

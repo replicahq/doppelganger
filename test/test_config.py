@@ -3,9 +3,13 @@ from __future__ import (
 )
 
 import unittest
-import os.path
 
-from doppelganger import Configuration
+
+import os.path
+from doppelganger import (
+    allocation,
+    Configuration,
+)
 
 CURRENT_VERSION = '0'
 
@@ -95,3 +99,21 @@ class TestConfig(unittest.TestCase):
         config_json = self._mock_config_files()
         config = Configuration.from_json(config_json)
         self.assertEqual(config.version, CURRENT_VERSION)
+
+    def test_get_all_person_fields(self):
+        config_json = self._mock_config_files()
+        config = Configuration.from_json(config_json)
+        combined_set = set(config.get_all_person_fields())
+        correct_set = set(tuple(set(
+            field.name for field in allocation.DEFAULT_PERSON_FIELDS).union(
+                set(config.person_fields))))
+        self.assertEqual(combined_set, correct_set)
+
+    def test_get_all_household_fields(self):
+        config_json = self._mock_config_files()
+        config = Configuration.from_json(config_json)
+        combined_set = set(config.get_all_household_fields())
+        correct_set = set(tuple(set(
+            field.name for field in allocation.DEFAULT_HOUSEHOLD_FIELDS).union(
+                set(config.household_fields))))
+        self.assertEqual(combined_set, correct_set)
