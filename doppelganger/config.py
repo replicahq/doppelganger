@@ -87,7 +87,7 @@ class Configuration(object):
         """Create a tuple of combined config and the default person fields.
 
         Returns: Combination of allocation default person
-            fields and configuration person fields
+            fields and configuration person fields as tuple
         """
 
         default_set = set(field.name for field in allocation.DEFAULT_PERSON_FIELDS)
@@ -98,7 +98,7 @@ class Configuration(object):
         """Create a tuple of combined config and the default household fields.
 
         Returns: Combination of allocation default household
-            fields and configuration household fields
+            fields and configuration household fields as tuple
         """
 
         default_set = set(field.name for field in allocation.DEFAULT_HOUSEHOLD_FIELDS)
