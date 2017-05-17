@@ -100,12 +100,19 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(config.version, CURRENT_VERSION)
 
     def test_get_all_person_fields(self):
-        # combined_set = set(self.confg.get_all_person_fields())
-        # correct_set = set(tuple(set(
-        #     field.name for field in allocation.DEFAULT_HOUSEHOLD_FIELDS).union(
-        #         set(self.confg.person_fields))))
-        # self.assertEqual(combined_set, correct_set)
-        pass
+        config_json = self._mock_config_files()
+        config = Configuration.from_json(config_json)
+        combined_set = set(config.get_all_person_fields())
+        correct_set = set(tuple(set(
+            field.name for field in allocation.DEFAULT_PERSON_FIELDS).union(
+                set(config.person_fields))))
+        self.assertEqual(combined_set, correct_set)
 
     def test_get_all_household_fields(self):
-        pass
+        config_json = self._mock_config_files()
+        config = Configuration.from_json(config_json)
+        combined_set = set(config.get_all_household_fields())
+        correct_set = set(tuple(set(
+            field.name for field in allocation.DEFAULT_HOUSEHOLD_FIELDS).union(
+                set(config.household_fields))))
+        self.assertEqual(combined_set, correct_set)

@@ -90,7 +90,7 @@ class Configuration(object):
             fields and configuration person fields
         """
 
-        default_set = set(field.name for field in allocation.DEFAULT_HOUSEHOLD_FIELDS)
+        default_set = set(field.name for field in allocation.DEFAULT_PERSON_FIELDS)
         config_set = set(self.person_fields)
         return tuple(default_set.union(config_set))
 
@@ -101,6 +101,6 @@ class Configuration(object):
             fields and configuration household fields
         """
 
-        default_set = set(field.name for field in allocation.DEFAULT_PERSON_FIELDS)
+        default_set = set(field.name for field in allocation.DEFAULT_HOUSEHOLD_FIELDS)
         config_set = set(self.household_fields)
         return tuple(default_set.union(config_set))
