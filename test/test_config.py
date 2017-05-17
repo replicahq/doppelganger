@@ -4,6 +4,7 @@ from __future__ import (
 
 import unittest
 
+
 import os.path
 from doppelganger import (
     allocation,
