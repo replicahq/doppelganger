@@ -6,8 +6,8 @@ import unittest
 
 import os.path
 from doppelganger import (
-    Configuration,
     allocation,
+    Configuration,
 )
 
 CURRENT_VERSION = '0'
@@ -99,13 +99,13 @@ class TestConfig(unittest.TestCase):
         config = Configuration.from_json(config_json)
         self.assertEqual(config.version, CURRENT_VERSION)
 
-    def test_get_combined_config_and_default_fields(self):
+    def test_get_all_person_fields(self):
+        # combined_set = set(self.confg.get_all_person_fields())
+        # correct_set = set(tuple(set(
+        #     field.name for field in allocation.DEFAULT_HOUSEHOLD_FIELDS).union(
+        #         set(self.confg.person_fields))))
+        # self.assertEqual(combined_set, correct_set)
+        pass
 
-        configuration_household_fields = ('field1', 'field2', 'field3')
-        combined_set = set(Configuration.get_combined_config_and_default_fields(
-            allocation.DEFAULT_HOUSEHOLD_FIELDS, configuration_household_fields))
-
-        correct_set = set(tuple(set(
-            field.name for field in allocation.DEFAULT_HOUSEHOLD_FIELDS).union(
-                set(configuration_household_fields))))
-        self.assertEqual(combined_set, correct_set)
+    def test_get_all_household_fields(self):
+        pass

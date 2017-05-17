@@ -3,7 +3,7 @@ from __future__ import (
 )
 
 import json
-from doppelganger import bayesnets
+from doppelganger import (bayesnets, allocation)
 
 CURRENT_VERSION = '0'
 
@@ -83,20 +83,24 @@ class Configuration(object):
             config_json = json.loads(training_config_file.read())
             return Configuration.from_json(config_json)
 
-    @staticmethod
-    def get_combined_config_and_default_fields(allocation_default_housedold_fields,
-                                               configuration_household_fields):
-        """Create a tuple of combined config and the default fields.
+    def get_all_person_fields(self):
+        """Create a tuple of combined config and the default person fields.
 
-        Args:
-            allocation_default_housedold_fields (set): a set of
-                allocation default housedold fields
-            configuration_household_fields (list): a list of strings
-                of configuration household fields
+        Returns: Combination of allocation default person
+            fields and configuration person fields
+        """
 
-        Returns: Combination of allocation default housedold
+        default_set = set(field.name for field in allocation.DEFAULT_HOUSEHOLD_FIELDS)
+        config_set = set(self.person_fields)
+        return tuple(default_set.union(config_set))
+
+    def get_all_household_fields(self):
+        """Create a tuple of combined config and the default household fields.
+
+        Returns: Combination of allocation default household
             fields and configuration household fields
         """
-        default_set = set(field.name for field in allocation_default_housedold_fields)
-        config_set = set(configuration_household_fields)
+
+        default_set = set(field.name for field in allocation.DEFAULT_PERSON_FIELDS)
+        config_set = set(self.household_fields)
         return tuple(default_set.union(config_set))
