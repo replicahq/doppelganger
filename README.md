@@ -8,12 +8,20 @@ A Python package of tools to support population synthesizers. Population synthes
 
 ## Installing
 
-Doppelganger relies on the Python packages listed in setup.py as well as pomegranate. To get started, execute the following commands in your shell from the doppelganger root directory.
+Doppelganger relies on numpy. You can check if you have numpy on your system by running this from your shell:
+```shell
+pip freeze | grep numpy
+```
+If you see a result like `numpy==[version_number]`, you're good to go.
 
+If you don't already have numpy running on your system, we strongly recommend you use a version of python with numpy pre-built.  We recommend [Anaconda](https://www.continuum.io/downloads) but there are [several options](https://www.scipy.org/install.html).
+
+Once you have numpy set up, clone or download this repository, go to the root directory and run
 ```shell
 pip install .
-pip install pomegranate --no-cache-dir
 ```
+
+You should now have doppelganger installed.
 
 ## Examples
 
