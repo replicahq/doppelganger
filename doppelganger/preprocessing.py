@@ -1,3 +1,5 @@
+# Copyright 2017 Sidewalk Labs | https://www.apache.org/licenses/LICENSE-2.0
+
 """Utility functions for discretizing values.
 
 """

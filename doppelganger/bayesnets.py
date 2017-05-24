@@ -1,3 +1,5 @@
+# Copyright 2017 Sidewalk Labs | https://www.apache.org/licenses/LICENSE-2.0
+
 """Library for modeling generative typed bayesian networks.
 
 Each model consists of multiple networks, one for each type of input data.

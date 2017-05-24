@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# Copyright 2017 Sidewalk Labs | https://www.apache.org/licenses/LICENSE-2.0
+
 from setuptools import setup
 
 setup(
