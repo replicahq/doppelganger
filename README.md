@@ -25,7 +25,7 @@ You should now have doppelganger installed.
 
 ## Examples
 
-The `example` directory contains a [Jupyter Notebook of examples and demonstrations](https://github.com/sidewalklabs/doppelganger/blob/documentation/examples/Doppelganger.ipynb) of Doppelganger's features.
+The `example` directory contains a [Jupyter Notebook of examples and demonstrations](https://github.com/sidewalklabs/doppelganger/blob/master/examples/doppelganger_example_full.ipynb) of Doppelganger's features.
 
 ## Features
 
