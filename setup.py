@@ -15,7 +15,7 @@ setup(
         'cvxpy==0.4.8',
         'numpy>=1.11.0',
         'pandas>=0.19.0',
-        'pomegranate>=0.7.1',
+        'pomegranate==0.7.1',
         'requests>=2.0.0',
         'six>=1.10.0'
     ],
