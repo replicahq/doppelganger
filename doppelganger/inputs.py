@@ -6,6 +6,7 @@
 from __future__ import (
     absolute_import, division, print_function, unicode_literals
 )
+from builtins import str
 
 import datetime
 from enum import Enum
@@ -47,9 +48,9 @@ def generate_binning_preprocessor(bins):
     if len(bins) == 0:
         return lambda x: 'all_values'
     labels = ['<={}'.format(bins[0])]
-    last_label = unicode(bins[0])
+    last_label = str(bins[0])
     for elem in bins[1:]:
-        bin_label = unicode(elem)
+        bin_label = str(elem)
         labels.append(last_label + '-' + bin_label)
         last_label = bin_label
     labels.append('{}+'.format(bins[-1]))
@@ -82,7 +83,7 @@ def age_discrete(age):
 
 def num_people_discrete(num_people):
     if int(num_people) < 4:
-        return unicode(int(num_people))
+        return str(int(num_people))
     return '4+'
 
 

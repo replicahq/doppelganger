@@ -17,7 +17,8 @@ setup(
         'pandas>=0.19.0',
         'pomegranate==0.7.1',
         'requests>=2.0.0',
-        'six>=1.10.0'
+        'six>=1.10.0',
+        'future>=0.16.0'
     ],
     extras_require={
         'tests': [

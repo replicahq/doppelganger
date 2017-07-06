@@ -14,6 +14,7 @@ specify a segmentation function to segment the training data by type.
 from __future__ import (
     absolute_import, division, print_function, unicode_literals
 )
+from builtins import range, str
 
 from collections import defaultdict, Counter
 import json
@@ -56,7 +57,7 @@ class SegmentedData(object):
             type_ = segmenter(row)
             weight = row[weight_field] if weight_field else 1
             cleaned_row = tuple(row[fields])
-            for _ in xrange(weight):
+            for _ in range(weight):
                 type_to_data[type_].append(cleaned_row)
         return SegmentedData(type_to_data, segmenter)
 
@@ -254,7 +255,7 @@ class BayesianNetworkModel(object):
             if old is None or new is None:
                 return False
             assert len(old) == len(new)
-            for i in xrange(len(old)):
+            for i in range(len(old)):
                 # Compare as tuple because numpy arrays return an array
                 # of bools instead of a bool on comparison.
                 if tuple(old[i]) != tuple(new[i]):
@@ -313,7 +314,7 @@ class BayesianNetworkModel(object):
             self.distribution_cache[(type_, evidence)] = distributions
 
         generated = tuple(
-            tuple(distribution.sample() for distribution in distributions) for _ in xrange(count)
+            tuple(distribution.sample() for distribution in distributions) for _ in range(count)
         )
         return generated
 
@@ -326,7 +327,7 @@ def define_bayes_net_structure(nodes, edges):
         edges dict(unicode -> unicode): edges in the form of parent -> child
 
     Returns: bayes net structure currently as a list where element i is a list
-        of the indeces of parents of i
+        of the indices of parents of i
     """
     child_to_parents = defaultdict(set)
     for parent, children in edges.items():
@@ -335,8 +336,8 @@ def define_bayes_net_structure(nodes, edges):
     node_to_index = {name: i for i, name in enumerate(nodes)}
     structure = []
     for child in nodes:
-        structure.append(tuple(node_to_index[parent] for parent in child_to_parents[child]))
-    return tuple(tuple(s) for s in structure)
+        structure.append(frozenset(node_to_index[parent] for parent in child_to_parents[child]))
+    return tuple(frozenset(s) for s in structure)
 
 
 def generate_laplace_prior_data(fields, preprocessor):

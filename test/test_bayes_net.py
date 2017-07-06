@@ -3,12 +3,12 @@
 from __future__ import (
     absolute_import, division, print_function, unicode_literals
 )
-
 import unittest
 import math
+import sys
 
 import pandas
-from mock import patch
+from mock import patch, mock_open
 import numpy
 
 from doppelganger import (
@@ -192,7 +192,7 @@ class BayesNetTests(unittest.TestCase):
             'sex': ['income']
         }
         structure = bayesnets.define_bayes_net_structure(nodes, edges)
-        self.assertSequenceEqual(structure, ((), (0,), (0, 1)))
+        self.assertSequenceEqual(structure, (frozenset(), frozenset((0,)), frozenset((0, 1))))
 
     def test_to_from_json(self):
         household_model, _ = self._mock_household_collection()
@@ -297,7 +297,7 @@ class BayesNetTests(unittest.TestCase):
 
         def _check_dataframe(dataframe, expected_cols,
                              expected_contents, expected_rows=None):
-            self.assertSetEqual(set(dataframe), expected_columns)
+            self.assertSetEqual(set(dataframe), expected_cols)
             if expected_rows is not None:
                 # Doesn't need to be checked for series
                 self.assertSetEqual(set(dataframe.index), expected_rows)
@@ -321,7 +321,8 @@ class BayesNetTests(unittest.TestCase):
             self.assertSequenceEqual(household_model.fields, household_model_new.fields)
             self._check_household_generate(household_model_new)
 
-        with patch('__builtin__.open') as open_mock:
+        builtin_module_name = 'builtins' if sys.version_info.major == 3 else '__builtin__'
+        with patch('{}.open'.format(builtin_module_name), new_callable=mock_open()) as open_mock:
             household_model.write('file')
             open_mock.assert_called_once_with('file', 'w')
             # Check that correct json is written
