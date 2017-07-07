@@ -1,13 +1,15 @@
+machine:
+  environment:
+    TESTCMD: 'pip install pip --upgrade && python -V && pip install numpy && pip install .[tests] && flake8 && nosetests --with-coverage -vv'
+
 dependencies:
   override:
-    - pip install numpy
-    - pip install .[tests]
     - pip install coveralls
 
 test:
   override:
-    - flake8
-    - nosetests -vv --with-coverage
+    - deactivate && pyenv shell 2.7.11 && bash -c "$TESTCMD"
+    - deactivate && pyenv shell 3.6.1 && bash -c "$TESTCMD"
 
   post:
     - coveralls
