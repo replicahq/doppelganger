@@ -336,8 +336,8 @@ def define_bayes_net_structure(nodes, edges):
     node_to_index = {name: i for i, name in enumerate(nodes)}
     structure = []
     for child in nodes:
-        structure.append(frozenset(node_to_index[parent] for parent in child_to_parents[child]))
-    return tuple(frozenset(s) for s in structure)
+        structure.append(tuple(node_to_index[parent] for parent in child_to_parents[child]))
+    return tuple(tuple(s) for s in structure)
 
 
 def generate_laplace_prior_data(fields, preprocessor):

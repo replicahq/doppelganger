@@ -141,3 +141,5 @@ nose_stub.py
 # Emacs
 *~
 
+# Ctags
+tags

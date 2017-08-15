@@ -59,6 +59,15 @@ class BayesNetTests(unittest.TestCase):
             self._mock_person('c', '18-34', 'M', '<=0', weight)
         ]))
 
+    def _mock_nodes(self):
+        return ('age', 'sex', 'income')
+
+    def _mock_edges(self):
+        return {
+            'age': ['sex', 'income'],
+            'sex': ['income']
+        }
+
     def _household_fields(self):
         return [inputs.HOUSEHOLD_INCOME.name, inputs.NUM_VEHICLES.name]
 
@@ -186,13 +195,33 @@ class BayesNetTests(unittest.TestCase):
         self._check_household_generate(household_model)
 
     def test_load_bayes_net(self):
-        nodes = ('age', 'sex', 'income')
-        edges = {
-            'age': ['sex', 'income'],
-            'sex': ['income']
-        }
+        nodes = self._mock_nodes()
+        edges = self._mock_edges()
         structure = bayesnets.define_bayes_net_structure(nodes, edges)
-        self.assertSequenceEqual(structure, (frozenset(), frozenset((0,)), frozenset((0, 1))))
+        self.assertSequenceEqual(structure, ((), (0,), (0, 1)))
+
+    def test_train_bayes_net_from_generated_structure(self):
+        '''Ensure the structures created by define_bayes_net_structure
+        are compatible with pomegranate
+        '''
+        nodes = self._mock_nodes()
+        edges = self._mock_edges()
+        person_structure = bayesnets.define_bayes_net_structure(nodes, edges)
+        person_training_data = self._mock_people_input()
+        training_data = bayesnets.SegmentedData.from_data(
+            person_training_data, self._person_fields(), segmenter=self._person_segmenter()
+        )
+        self.assertEquals(
+            type(
+                BayesianNetworkModel.train(
+                    training_data,
+                    person_structure,
+                    self._person_fields,
+                    prior_data=None
+                )
+            ),
+            bayesnets.BayesianNetworkModel
+        )
 
     def test_to_from_json(self):
         household_model, _ = self._mock_household_collection()

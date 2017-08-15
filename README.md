@@ -20,6 +20,10 @@ Once you have numpy set up, clone or download this repository, go to the root di
 ```shell
 pip install .
 ```
+Or for developers
+```shell
+pip install ".[tests]"
+```
 
 You should now have doppelganger installed.
 
