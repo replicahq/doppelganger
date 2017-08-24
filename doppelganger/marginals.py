@@ -89,7 +89,7 @@ class Marginals(object):
         return full_controls
 
     @staticmethod
-    def from_census_data(puma_tract_mappings, census_key, state=None, pumas=None):
+    def from_census_data(puma_tract_mappings, census_key, state=None, puma=None):
         """Fetch marginal sums from the census API.
 
         Args:
@@ -103,20 +103,20 @@ class Marginals(object):
 
             census_key (unicode): census API key
 
-            pumas (list(unicode)): a puma to fetch for.
+            pumas (unicode): a puma to fetch for.
 
         Returns:
             Marginals: marginals fetched from the census API
 
         """
         data = []
-        if not pumas or not state:
+        if not puma or not state:
             raise ValueError('''Please supply a state fips code and a puma.
                     https://www.census.gov/geo/reference/ansi_statetables.html''')
 
         for line in puma_tract_mappings:
-            if state is None or pumas is None\
-                    or line['STATEFP'] != state or line['PUMA5CE'] not in pumas:
+            if state is None or puma is None\
+                    or line['STATEFP'] != state or line['PUMA5CE'] != puma:
                 continue
             state_key = line['STATEFP']
             tract_key = line['TRACTCE']
