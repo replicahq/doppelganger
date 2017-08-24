@@ -58,7 +58,7 @@ class MarginalsTest(unittest.TestCase):
                    return_value=self._mock_response()):
             marg = Marginals.from_census_data(
                     puma_tract_mappings=self._mock_marginals_file(), census_key=None,
-                    state=state, puma=puma
+                    state=state, pumas=set([puma])
                 )
         expected = {
             'STATEFP': '06',
