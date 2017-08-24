@@ -128,9 +128,10 @@ v# Misc data files
 *.h5
 *.omx
 
-# ActivitySim files
+# Data files
 data/
 output/
+examples/sample_data/2010_puma_tract_mapping.txt
 
 # Visual Studio
 *.vscode
@@ -143,3 +144,6 @@ nose_stub.py
 
 # Ctags
 tags
+
+# Run Files which contain protected creds
+run/

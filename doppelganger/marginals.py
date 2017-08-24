@@ -89,7 +89,7 @@ class Marginals(object):
         return full_controls
 
     @staticmethod
-    def from_census_data(puma_tract_mappings, census_key, pumas=None):
+    def from_census_data(puma_tract_mappings, census_key, state=None, pumas=None):
         """Fetch marginal sums from the census API.
 
         Args:
@@ -112,9 +112,13 @@ class Marginals(object):
 
         """
         data = []
+        if not pumas or not state:
+            raise ValueError('''Please supply a state fips code and a puma.
+                    https://www.census.gov/geo/reference/ansi_statetables.html''')
 
         for line in puma_tract_mappings:
-            if pumas is not None and line['PUMA5CE'] not in pumas:
+            if state is None or pumas is None\
+                    or line['STATEFP'] != state or line['PUMA5CE'] not in pumas:
                 continue
             state_key = line['STATEFP']
             tract_key = line['TRACTCE']
@@ -153,19 +157,21 @@ class Marginals(object):
         return Marginals(pandas.DataFrame(data, columns=columns))
 
     @staticmethod
-    def from_csv(infile, puma=None):
+    def from_csv(infile, state=None, puma=None):
         """Load marginals from file.
 
         Args:
             infile (unicode): path to csv
+            state (unicode): state fips code (2-digit)
+            puma (unicode): puma code (5-digit)
 
         Returns:
-            Marginals: marginals fetched from the census API
+            Marginals: marginals fetched from a csv file
 
         """
         data = pandas.read_csv(infile)
-        if puma is not None:
-            data = data[data['PUMA5CE'] == int(puma)]
+        if state is not None and puma is not None:
+            data = data[data['STATEFP'] == int(state) and data['PUMA5CE'] == int(puma)]
         return Marginals(data)
 
     def write(self, outfile):
