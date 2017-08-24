@@ -112,7 +112,7 @@ class Marginals(object):
         data = []
         if not puma or not state:
             raise ValueError('''Please supply a state fips code and a puma.
-                    https://www.mcc.co.mercer.pa.us/dps/state_fips_code_listing.htm''')
+                    https://www.census.gov/geo/reference/ansi_statetables.html''')
 
         for line in puma_tract_mappings:
             if state is None or puma is None\

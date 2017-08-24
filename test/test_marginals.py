@@ -52,11 +52,14 @@ class MarginalsTest(unittest.TestCase):
                  '075', '023001']))
 
     def test_fetch_marginals(self):
+        state = self._mock_marginals_file()[0]['STATEFP']
         puma = self._mock_marginals_file()[0]['PUMA5CE']
         with patch('doppelganger.marginals.Marginals._fetch_from_census',
                    return_value=self._mock_response()):
             marg = Marginals.from_census_data(
-                self._mock_marginals_file(), set([puma]))
+                    puma_tract_mappings=self._mock_marginals_file(), census_key=None,
+                    state=state, puma=puma
+                )
         expected = {
             'STATEFP': '06',
             'COUNTYFP': '075',
