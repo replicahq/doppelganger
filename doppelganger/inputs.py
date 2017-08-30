@@ -155,6 +155,10 @@ PUMS_INPUTS = [
     SERIAL_NUMBER,
     PUMA
 ]
-
-
 NAME_TO_DATATYPE = {datatype.name: datatype for datatype in PUMS_INPUTS}
+
+# Non-PUMS data types
+TRACT = DataType('tract', None, None, None, None)
+COUNT = DataType('count', None, None, None, None)
+REPEAT_INDEX = DataType('repeat_index', None, None, None, None)
+HOUSEHOLD_ID = DataType('household_id', None, None, None, None)

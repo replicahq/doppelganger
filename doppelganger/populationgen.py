@@ -55,7 +55,7 @@ class Population(object):
             evidence = tuple((field, row[field]) for field in fields)
             segment = segmenter(row)
             # Households store their repeat information directly
-            yield serialno, evidence, segment, row['tract'], row['count']
+            yield serialno, evidence, segment, row[inputs.TRACT.name], row['count']
 
     @staticmethod
     def _generate_from_model(household_allocator, data, model, fields, evidence_fn):
@@ -71,10 +71,11 @@ class Population(object):
         ):
             generated_rows = model.generate(segment, evidence, count=count)
             for repeat_id, row in enumerate(generated_rows):
-                results.append((tract, serialno, repeat_id) + row)
+                household_id = '{}-{}-{}'.format(tract, serialno, repeat_id)
+                results.append((household_id, tract, serialno, repeat_id) + row)
 
-        column_names = ['tract', inputs.SERIAL_NUMBER.name,
-                        'repeat_index'] + list(model.fields)
+        column_names = [inputs.HOUSEHOLD_ID.name, inputs.TRACT.name, inputs.SERIAL_NUMBER.name,
+                        inputs.REPEAT_INDEX.name] + list(model.fields)
         results_dataframe = pandas.DataFrame(results, columns=column_names)
         return results_dataframe
 

@@ -82,8 +82,8 @@ class HouseholdAllocator(object):
         self.serialno_to_counts = defaultdict(list)
         for _, row in self.allocated_households.iterrows():
             serialno = row[inputs.SERIAL_NUMBER.name]
-            tract = row['tract']
-            count = int(row['count'])
+            tract = row[inputs.TRACT.name]
+            count = int(row[inputs.COUNT.name])
             self.serialno_to_counts[serialno].append(CountInformation(tract, count))
 
     def get_counts(self, serialno):
@@ -158,9 +158,9 @@ class HouseholdAllocator(object):
 
         # Extend households and add the weights and ids
         households_extend = pandas.concat([households] * n_tracts)
-        households_extend['count'] = total_weights.flatten().T
+        households_extend[inputs.COUNT.name] = total_weights.flatten().T
         tracts = np.repeat(tract_ids, n_samples)
-        households_extend['tract'] = tracts
+        households_extend[inputs.TRACT.name] = tracts
 
         return households_extend, persons
 

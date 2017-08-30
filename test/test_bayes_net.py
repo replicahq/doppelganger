@@ -198,7 +198,11 @@ class BayesNetTests(unittest.TestCase):
         nodes = self._mock_nodes()
         edges = self._mock_edges()
         structure = bayesnets.define_bayes_net_structure(nodes, edges)
-        self.assertSequenceEqual(structure, ((), (0,), (0, 1)))
+        # pomegranate requires the use of tuples for edges but edges aren't ordered
+        self.assertSequenceEqual(
+            [set(node) for node in structure],
+            [set(), set((0,)), set((0, 1))],
+        )
 
     def test_train_bayes_net_from_generated_structure(self):
         '''Ensure the structures created by define_bayes_net_structure

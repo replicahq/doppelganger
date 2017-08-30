@@ -52,17 +52,20 @@ class TestPopulationGen(unittest.TestCase):
 
     def _check_household_output(self, dataframe):
         self.assertSequenceEqual(
-            dataframe['tract'].tolist(), ('tract1', 'tract1', 'tract2', 'tract2'))
+            dataframe[inputs.TRACT.name].tolist(), ('tract1', 'tract1', 'tract2', 'tract2'))
         self.assertSequenceEqual(
             dataframe[inputs.SERIAL_NUMBER.name].tolist(), ('b', 'b', 'b', 'b'))
-        self.assertSequenceEqual(dataframe['repeat_index'].tolist(), (0, 1, 0, 1))
+        self.assertSequenceEqual(dataframe[inputs.REPEAT_INDEX.name].tolist(), (0, 1, 0, 1))
+        self.assertEqual(dataframe[inputs.HOUSEHOLD_ID.name].tolist()[0], 'tract1-b-0')
 
     def _check_person_output(self, dataframe):
         self.assertSequenceEqual(
-            dataframe['tract'].tolist(), ('tract1', 'tract1', 'tract2', 'tract2',
-                                          'tract1', 'tract1', 'tract2', 'tract2'))
-        self.assertSequenceEqual(dataframe['repeat_index'].tolist(), (0, 1, 0, 1, 0, 1, 0, 1))
+            dataframe[inputs.TRACT.name].tolist(), ('tract1', 'tract1', 'tract2', 'tract2',
+                                                    'tract1', 'tract1', 'tract2', 'tract2'))
+        self.assertSequenceEqual(
+            dataframe[inputs.REPEAT_INDEX.name].tolist(), (0, 1, 0, 1, 0, 1, 0, 1))
         self.assertSequenceEqual(dataframe[inputs.AGE.name].tolist(), ['35-64'] * 8)
+        self.assertEqual(dataframe[inputs.HOUSEHOLD_ID.name].tolist()[0], 'tract1-b-0')
 
     def test_generate_persons_simple(self):
         person_model = self._mock_model(
