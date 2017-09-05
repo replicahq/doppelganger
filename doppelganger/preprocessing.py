@@ -1,7 +1,6 @@
 # Copyright 2017 Sidewalk Labs | https://www.apache.org/licenses/LICENSE-2.0
 
 """Utility functions for discretizing values.
-
 """
 from __future__ import (
     absolute_import, division, print_function, unicode_literals
@@ -26,11 +25,9 @@ class Preprocessor(object):
         """Extract the data types from the given DataFrames and process them
 
         Args:
-            dataframe (pandas.DataFrame): puma-style data
-            fields (iterable): the standard names of fields
-                to extract
-            name_map (dict): map of standard name to name within this
-                datasource
+            dataframe (pandas.DataFrame): pums-style data
+            fields (iterable): the standard names of fields to extract
+            name_map (dict): map of standard name to name within this datasource
 
         Returns: pandas.DataFrame of the given fields, processed
 
@@ -42,7 +39,7 @@ class Preprocessor(object):
             elif field_name in inputs.NAME_TO_DATATYPE:
                 procesessor = inputs.NAME_TO_DATATYPE[field_name].process
             else:
-                print('Unknown data field {}'.format(
+                print('Preprocessor: Unknown data field {}'.format(
                     field_name), file=sys.stderr)
                 sys.exit()
 

@@ -141,7 +141,9 @@ PERSON_WEIGHT = DataType(
 
 SERIAL_NUMBER = DataType('serial_number', 'serialno', None, None, None)
 
-PUMA = DataType('puma', 'puma', None, None, None)
+PUMA = DataType('puma', 'puma', str, None, None)
+
+STATE = DataType('state', 'st', str, None, None)
 
 PUMS_INPUTS = [
     AGE,
@@ -153,6 +155,7 @@ PUMS_INPUTS = [
     HOUSEHOLD_WEIGHT,
     PERSON_WEIGHT,
     SERIAL_NUMBER,
+    STATE,
     PUMA
 ]
 NAME_TO_DATATYPE = {datatype.name: datatype for datatype in PUMS_INPUTS}

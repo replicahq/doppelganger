@@ -11,5 +11,5 @@ from .populationgen import Population
 # Enumerate exports, to make the linter happy.
 __all__ = [
     HouseholdAllocator, SegmentedData, BayesianNetworkModel, Configuration,
-    PumsData, CleanedData, Marginals, Population, Preprocessor, DirtyDataSource
+    PumsData, CleanedData, Marginals, Population, Preprocessor, DirtyDataSource,
 ]

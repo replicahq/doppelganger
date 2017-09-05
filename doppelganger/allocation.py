@@ -15,19 +15,21 @@ from doppelganger import inputs
 
 # These are the minimum fields needed to allocate households
 DEFAULT_PERSON_FIELDS = {
+    inputs.STATE,
+    inputs.PUMA,
     inputs.SERIAL_NUMBER,
     inputs.AGE,
     inputs.SEX,
     inputs.PERSON_WEIGHT,
-    inputs.PUMA
 }
 
 
 DEFAULT_HOUSEHOLD_FIELDS = {
+    inputs.STATE,
+    inputs.PUMA,
     inputs.SERIAL_NUMBER,
     inputs.NUM_PEOPLE,
     inputs.HOUSEHOLD_WEIGHT,
-    inputs.PUMA
 }
 
 
