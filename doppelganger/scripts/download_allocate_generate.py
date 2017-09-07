@@ -1,10 +1,14 @@
 from __future__ import (
     absolute_import, division, print_function, unicode_literals
 )
+import builtins
+
+import logging
 import argparse
 import csv
 import os
 import pandas
+
 from doppelganger import (
     inputs,
     CleanedData,
@@ -15,8 +19,9 @@ from doppelganger import (
     Population,
     Marginals,
 )
-import builtins
 from doppelganger.scripts.fetch_pums_data_from_db import fetch_pums_data
+
+logging.basicConfig(filename='logs', filemode='a', level=logging.INFO)
 
 FILE_PATTERN = 'state_{}_puma_{}_{}'
 
@@ -107,8 +112,8 @@ def download_and_load_pums_data(
     person_path = os.path.sep.join([output_dir, person_filename])
 
     if not os.path.exists(household_path) or not os.path.exists(person_path):
-        print('Data not found at: \n{}\n or {}. Downloading data from the db'
-              .format(household_path, person_path))
+        logging.info('Data not found at:\n%s\nor\n%s\n Downloading data from the db',
+                     household_path, person_path)
 
         households_data, persons_data = fetch_pums_data(
                 state_id=state_id, puma_id=puma_id, configuration=configuration,
@@ -216,19 +221,26 @@ def download_tract_data(state_id, puma_id, output_dir, census_api_key, puma_trac
                 csv_reader, census_api_key, state=state_id, pumas=puma_id
             )
             if len(marginals.data) <= 1:
+                logging.exception('Couldn\'t fetch data from the census. Check your API key')
                 raise CensusFetchException()
             else:
+                logging.info('Writing out marginal file for state: %s, puma: %s', state_id, puma_id)
                 marginals.write(marginal_path)
         controls = Marginals.from_csv(marginal_path)
 
     '''With the above marginal controls (tract data), the methods in allocation.py
     allocate discrete PUMS households to the subject PUMA.'''
 
-    allocator = HouseholdAllocator.from_cleaned_data(
+    try:
+        allocator = HouseholdAllocator.from_cleaned_data(
                 marginals=controls,
                 households_data=households_data,
                 persons_data=persons_data
             )
+    except Exception as e:
+        logging.exception('Error Allocating state: %s, puma: %s\n%s', state_id, puma_id, e)
+        exit()
+
     return allocator
 
 

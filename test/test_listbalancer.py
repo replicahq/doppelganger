@@ -232,7 +232,7 @@ class ListBalancerTests(unittest.TestCase):
             np.tile(expected_weights, (n_tracts, 1)))
         gamma = 1000.
         meta_gamma = 1000.
-        hh_weights, _, _ = listbalancer.balance_multi_cvx(
+        hh_weights = listbalancer.balance_multi_cvx(
             hh_table, A_extend, B, w_extend, gamma * mu_extend.T, meta_gamma)
         np.testing.assert_allclose(
             hh_weights, expected_weights_extend, rtol=0.01, atol=0)
@@ -249,7 +249,7 @@ class ListBalancerTests(unittest.TestCase):
         B = np.mat(np.dot(np.ones((1, n_tracts)), A_extend)[0])
         gamma = 10.
         meta_gamma = 1000.
-        hh_weights, _, _ = listbalancer.balance_multi_cvx(
+        hh_weights = listbalancer.balance_multi_cvx(
             hh_table, A_extend, B, w_extend, gamma * mu_extend.T, meta_gamma
         )
         np.testing.assert_allclose(
@@ -259,7 +259,7 @@ class ListBalancerTests(unittest.TestCase):
         hh_table, A, w, mu, _ = self._mock_list_inconsistent()
         B = np.mat(np.dot(np.ones((1, 1)), A)[0])
         gamma = 1.
-        hh_weights, _, _ = listbalancer.balance_multi_cvx(
+        hh_weights = listbalancer.balance_multi_cvx(
             hh_table, A, B, w, gamma * mu.T
         )
         np.testing.assert_allclose(
@@ -269,7 +269,7 @@ class ListBalancerTests(unittest.TestCase):
         hh_table, A, w, mu, expected_weights = self._mock_list_consistent()
         B = np.mat(np.dot(np.ones((1, 1)), A)[0])
         gamma = 100000.
-        hh_weights, _, _ = listbalancer.balance_multi_cvx(
+        hh_weights = listbalancer.balance_multi_cvx(
             hh_table, A, B, w, gamma * mu.T
         )
         np.testing.assert_allclose(
@@ -281,7 +281,7 @@ class ListBalancerTests(unittest.TestCase):
         n_tracts = A.shape[0]
         B = np.mat(np.dot(np.ones((1, n_tracts)), A)[0])
         gamma = 10000.
-        hh_weights, _, _ = listbalancer.balance_multi_cvx(
+        hh_weights = listbalancer.balance_multi_cvx(
             hh_table, A, B, w, gamma * mu.T
         )
         np.testing.assert_allclose(

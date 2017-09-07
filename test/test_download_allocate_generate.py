@@ -246,7 +246,6 @@ class TestDownloadAllocateGenerate(unittest.TestCase):
                     persons_data=mock_persons_data
                 )
 
-    # @mock.patch('doppelganger.scripts.download_allocate_generate.pandas.DataFrame.to_csv')
     @mock.patch('doppelganger.scripts.download_allocate_generate.pandas.merge')
     @mock.patch('pandas.DataFrame.to_csv')
     @mock.patch('doppelganger.scripts.download_allocate_generate.Population')

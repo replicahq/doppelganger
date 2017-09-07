@@ -5,9 +5,10 @@ from __future__ import (
 )
 
 import logging
-
 import cvxpy as cvx
 import numpy as np
+
+logging.basicConfig(filename='logs', filemode='a', level=logging.INFO)
 
 
 def _insert_append(arr, indices, values, axis=0):
@@ -15,7 +16,7 @@ def _insert_append(arr, indices, values, axis=0):
 
     Args:
     arr (numpy array): Array to insert/append values
-    indices (list(int)): indices before which values is inserted
+    indices (list(int)): indices before which values are inserted
     values (numpy array): Values to insert into arr
     axis (int): Axis along which to insert values
 
@@ -84,10 +85,8 @@ def balance_cvx(hh_table, A, w, mu=None, verbose_solver=False):
         return x.value, z.value
 
 
-def balance_multi_cvx(
-    hh_table, A, B, w, mu=1000., meta_mu=1000., verbose_solver=False
-):
-    """Maximum Entropy allocaion method for multiple balanced units
+def balance_multi_cvx(hh_table, A, B, w, mu=1000., meta_mu=1000., verbose_solver=False):
+    """Maximum Entropy allocation method for multiple balanced units
 
     Args:
         hh_table (numpy matrix): Table of households categorical data
@@ -95,8 +94,7 @@ def balance_multi_cvx(
         B (numpy matrix): Meta-marginals
         w (numpy array): Initial household allocation weights
         mu (float): Importance weights of marginals for accuracy of fit
-        meta_mu (float): Importance weights of meta-marginals for accuracy of
-            fit
+        meta_mu (float): Importance weights of meta-marginals for accuracy of fit
         verbose_solver (boolean): Provide detailed solver info
 
     Returns:
@@ -112,7 +110,7 @@ def balance_multi_cvx(
 
     if zero_marginals.size:
         logging.info(
-            '{} tract(s) with zero marginals encountered. '
+            '%i tract(s) with zero marginals encountered. '
             'Setting weights to zero'.format(zero_marginals.size)
         )
 
@@ -136,7 +134,6 @@ def balance_multi_cvx(
     I = np.ones((n_tracts, 1))
 
     solved = False
-    importance_weights_relaxed = False
     while not solved:
         objective = cvx.Maximize(
             cvx.sum_entries(
@@ -173,32 +170,22 @@ def balance_multi_cvx(
                 # We can't reduce mu any further
                 break
             mu = np.where(mu > 10, mu - 10, 1)
-            importance_weights_relaxed = True
-
-    if importance_weights_relaxed:
-        logging.info(
-            'Solver error encountered. Importance weights have been relaxed.')
+            logging.info('Solver error encountered. Importance weights have been relaxed.')
 
     if not np.any(x.value):
-        logging.exception(
-            'Solution infeasible. Using initial weights.')
+        logging.exception('Solution infeasible. Using initial weights.')
 
     # If we didn't get a value return the initial weights
     weights_out = x.value if np.any(x.value) else w_relative
-    zs_out = z.value
-    qs_out = q.value
 
     # Insert zeros
     if zero_marginals.size:
         # Due to numpy insert behavior, we need to differentiate between the
-        # values that go into the middle of the array, and the values that get
-        # appended
+        # values that go into the middle of the array, and the values that get appended
         weights_out = _insert_append(
             weights_out, zero_marginals, zero_weights, axis=0)
-        zs_out = _insert_append(
-            z.value, zero_marginals, np.zeros((n_controls, 1)), axis=1)
 
-    return weights_out, zs_out, qs_out
+    return weights_out
 
 
 def discretize_multi_weights(hh_table, x, gamma=100., verbose_solver=False):

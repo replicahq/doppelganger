@@ -5,6 +5,7 @@ from __future__ import (
 )
 
 import json
+
 from doppelganger import (bayesnets, allocation)
 
 CURRENT_VERSION = '0'

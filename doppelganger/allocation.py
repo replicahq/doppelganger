@@ -147,7 +147,7 @@ class HouseholdAllocator(object):
         # Meta-balancing coefficient
         meta_gamma = 100.
 
-        hh_weights, z, q = balance_multi_cvx(
+        hh_weights = balance_multi_cvx(
             hh_table, A, B, w_extend, gamma * mu_extend.T, meta_gamma
         )
 

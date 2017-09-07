@@ -2,6 +2,7 @@
 from __future__ import (
     absolute_import, division, print_function, unicode_literals
 )
+
 import psycopg2
 from doppelganger import datasource, allocation, inputs, Preprocessor
 

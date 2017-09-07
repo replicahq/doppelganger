@@ -4,8 +4,11 @@ from __future__ import (
     absolute_import, division, print_function, unicode_literals
 )
 
+import logging
 import pandas
 import requests
+
+logging.basicConfig(filename='logs', filemode='a', level=logging.INFO)
 
 
 CONTROLS = {
@@ -130,7 +133,7 @@ class Marginals(object):
             tract_key = line['TRACTCE']
             puma_key = line['PUMA5CE']
             county_key = line['COUNTYFP']
-            print('Fetching tract {}'.format(tract_key))
+            logging.info('Fetching tract %s', tract_key)
             controls_dict = {}
             success = True
             for _, control_cat in CONTROLS.items():
