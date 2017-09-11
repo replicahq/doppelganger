@@ -246,10 +246,8 @@ class TestDownloadAllocateGenerate(unittest.TestCase):
                     persons_data=mock_persons_data
                 )
 
-    @mock.patch('doppelganger.scripts.download_allocate_generate.pandas.merge')
-    @mock.patch('pandas.DataFrame.to_csv')
     @mock.patch('doppelganger.scripts.download_allocate_generate.Population')
-    def test_generate_synths(self, mock_Population, mock_pandas_to_csv, mock_pandas_merge):
+    def test_generate_synths(self, mock_Population):
         mock_person_model = mock.Mock()
         mock_household_model = mock.Mock()
         mock_allocator = mock.Mock()

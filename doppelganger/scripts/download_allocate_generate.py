@@ -7,7 +7,6 @@ import logging
 import argparse
 import csv
 import os
-import pandas
 
 from doppelganger import (
     inputs,
@@ -256,27 +255,16 @@ def generate_synthetic_people_and_households(state_id, puma_id, output_dir, allo
             data using a cvx-solver.
         person_model: bayesian model describing the discritized pums fields' relation to one another
         household_model: same as person_model but for households
-
-    Returns:
-        combined: joined pandas dataframe of generated households and persons
     '''
     population = Population.generate(
                 household_allocator=allocator,
                 person_model=person_model,
                 household_model=household_model
             )
-    people = population.generated_people
-    households = population.generated_households
-
-    '''To create one fat table of people and household attributes we can join on\
-    tract, serial_number, and repeat_index:'''
-
-    merge_cols = ['tract', 'serial_number', 'repeat_index']
-    combined = pandas.merge(people, households, on=merge_cols)
-    combined.to_csv(os.path.join(
-            output_dir, FILE_PATTERN.format(state_id, puma_id, 'generated.csv')
-        ))
-    return combined
+    population.write(
+                os.path.join(output_dir, FILE_PATTERN.format(state_id, puma_id, 'people.csv')),
+                os.path.join(output_dir, FILE_PATTERN.format(state_id, puma_id, 'households.csv'))
+            )
 
 
 def is_valid_file(parser, filename):
