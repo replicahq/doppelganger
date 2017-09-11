@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name="doppelganger",
-    version="0.1.0",
+    version="0.1.1",
     description='Population synthesis library',
     author='Kat Busch, Kael Greco and contributors',
     author_email='doppelganger@sidewalklabs.com',
