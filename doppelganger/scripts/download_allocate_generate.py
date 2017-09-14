@@ -21,7 +21,6 @@ from doppelganger import (
 from doppelganger.scripts.fetch_pums_data_from_db import fetch_pums_data
 
 logging.basicConfig(filename='logs', filemode='a', level=logging.INFO)
-
 FILE_PATTERN = 'state_{}_puma_{}_{}'
 
 
@@ -144,7 +143,6 @@ def create_bayes_net(state_id, puma_id, output_dir, households_data, persons_dat
     Returns:
         household and person bayesian models
     '''
-
     # Write the persons bayes net to disk
     person_training_data = SegmentedData.from_data(
         cleaned_data=persons_data,
@@ -163,7 +161,7 @@ def create_bayes_net(state_id, puma_id, output_dir, households_data, persons_dat
             )
     person_model.write(person_model_filename)
 
-    # Households
+    # Write the households bayes net to disk
     household_training_data = SegmentedData.from_data(
         cleaned_data=households_data,
         fields=list(configuration.household_fields),
@@ -210,7 +208,6 @@ def download_tract_data(state_id, puma_id, output_dir, census_api_key, puma_trac
                 output_dir, FILE_PATTERN.format(state_id, puma_id, 'marginals.csv')
             )
 
-    # if os.path.exists(marginal_path):
     try:  # Already have marginals file
         controls = Marginals.from_csv(marginal_path)
     except:  # Download marginal data from the Census API

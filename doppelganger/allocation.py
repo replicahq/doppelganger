@@ -13,6 +13,9 @@ from doppelganger.listbalancer import (
 )
 from doppelganger import inputs
 
+
+HIGH_PASS_THRESHOLD = .1  # Filter controls which are present in less than 10% of HHs
+
 # These are the minimum fields needed to allocate households
 DEFAULT_PERSON_FIELDS = {
     inputs.STATE,
@@ -22,7 +25,6 @@ DEFAULT_PERSON_FIELDS = {
     inputs.SEX,
     inputs.PERSON_WEIGHT,
 }
-
 
 DEFAULT_HOUSEHOLD_FIELDS = {
     inputs.STATE,
@@ -116,14 +118,37 @@ class HouseholdAllocator(object):
         self.allocated_persons.to_csv(person_file)
 
     @staticmethod
+    def _filter_sparse_columns(df, cols):
+        ''' Filter out variables who are are so sparse they would break the solver.
+        Columns are assumed to be of an indicator type (0/1)
+        Args
+            df (pandas.DataFrame): dataframe to filter
+            cols (list(str)): column names
+
+        Returns
+            filtered column list (list(str))
+        '''
+        return df[cols]\
+            .loc[:, df[cols].sum()/float(len(df)) > HIGH_PASS_THRESHOLD]\
+            .columns.tolist()
+
+    @staticmethod
     def _allocate_households(households, persons, tract_controls):
+
         # Only take nonzero weights
         households = households[households[inputs.HOUSEHOLD_WEIGHT.name] > 0]
 
         # Initial weights from PUMS
         w = households[inputs.HOUSEHOLD_WEIGHT.name].as_matrix().T
 
-        hh_columns = ['1', '2', '3', '4+']
+        allocation_inputs = [inputs.NUM_PEOPLE, inputs.NUM_VEHICLES]  # Hard-coded for now
+        # Prepend column name to bin name to prevent bin collision
+        hh_columns = []
+        for a_input in allocation_inputs:
+            subset_values = households[a_input.name].unique().tolist()
+            hh_columns += HouseholdAllocator._str_broadcast(a_input.name, subset_values)
+
+        hh_columns = HouseholdAllocator._filter_sparse_columns(households, hh_columns)
 
         hh_table = households[hh_columns].as_matrix()
 
@@ -132,7 +157,7 @@ class HouseholdAllocator(object):
         n_samples = len(households.index.values)
 
         # Control importance weights
-        # < 1 means not important (thus relaxing the contraint in the solver)
+        # < 1 means not important (thus relaxing the constraint in the solver)
         mu = np.mat([1] * n_controls)
 
         w_extend = np.tile(w, (n_tracts, 1))
@@ -167,24 +192,42 @@ class HouseholdAllocator(object):
         return households_extend, persons
 
     @staticmethod
+    def _str_broadcast(string, list1):
+        return ['_'.join([string, element]) for element in list1]
+
+    @staticmethod
     def _format_data(households_data, persons_data):
-        hp_hhs = pandas.get_dummies(
-            households_data[inputs.NUM_PEOPLE.name])
-        households_data = pandas.concat([households_data, hp_hhs], axis=1)
+        hh_size = pandas.get_dummies(households_data[inputs.NUM_PEOPLE.name])
+        # Prepend column name to bin name to prevent bin collision
+        hh_size.columns = HouseholdAllocator\
+            ._str_broadcast(inputs.NUM_PEOPLE.name, hh_size.columns.tolist())
+
+        hh_vehicles = pandas.get_dummies(households_data[inputs.NUM_VEHICLES.name])
+        hh_vehicles.columns = HouseholdAllocator\
+            ._str_broadcast(inputs.NUM_VEHICLES.name, hh_vehicles.columns.tolist())
+        households_data = pandas.concat([households_data, hh_size, hh_vehicles], axis=1)
 
         hp_ages = pandas.get_dummies(persons_data[inputs.AGE.name])
+        hp_ages.columns = HouseholdAllocator\
+            ._str_broadcast(inputs.AGE.name, list(inputs.AGE.possible_values))
         persons_data = pandas.concat([persons_data, hp_ages], axis=1)
 
-        persons_trimmed = persons_data[[inputs.SERIAL_NUMBER.name, '0-17', '18-34', '35-64', '65+']]
+        persons_trimmed = persons_data[[
+                inputs.SERIAL_NUMBER.name
+            ] + hp_ages.columns.tolist()
+            ]
 
         # Get counts we need
-        persons_trimmed = persons_trimmed.groupby(
-            inputs.SERIAL_NUMBER.name).sum()
+        persons_trimmed = persons_trimmed.groupby(inputs.SERIAL_NUMBER.name).sum()
+
         households_trimmed = households_data[[
             inputs.SERIAL_NUMBER.name,
             inputs.NUM_PEOPLE.name,
-            inputs.HOUSEHOLD_WEIGHT.name, '1', '2', '3', '4+'
-        ]]
+            inputs.NUM_VEHICLES.name,
+            inputs.HOUSEHOLD_WEIGHT.name
+        ] + hh_size.columns.tolist()
+          + hh_vehicles.columns.tolist()
+        ]
 
         # Merge
         households_out = pandas.merge(

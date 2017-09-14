@@ -15,7 +15,7 @@ class DataSourceTest(unittest.TestCase):
     def _mock_dirty_household_input(self):
         return [
             {'serialno': 'a', 'np': '1', 'veh': '1', 'fincp': ''},
-            {'serialno': 'b', 'np': '2', 'veh': '6+', 'fincp': '0070000'},
+            {'serialno': 'b', 'np': '2', 'veh': '6', 'fincp': '0070000'},
             {'serialno': 'c', 'np': '1', 'veh': '', 'fincp': '0000000'}
         ]
 
@@ -50,7 +50,7 @@ class DataSourceTest(unittest.TestCase):
         expected = {
             inputs.SERIAL_NUMBER.name: 'b',
             inputs.NUM_PEOPLE.name: '2',
-            inputs.NUM_VEHICLES.name: '6+',
+            inputs.NUM_VEHICLES.name: '3+',
             inputs.HOUSEHOLD_INCOME.name: '40000+'
         }
         self.assertDictEqual(actual, expected)

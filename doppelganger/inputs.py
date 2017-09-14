@@ -82,9 +82,19 @@ def age_discrete(age):
 
 
 def num_people_discrete(num_people):
+    if is_blank(num_people):
+        return '0'  # ACS has no equivalent to the PUMS '' value
     if int(num_people) < 4:
         return str(int(num_people))
     return '4+'
+
+
+def num_vehicles_discrete(num_vehicles):
+    if is_blank(num_vehicles):
+        return '0'  # ACS has no equivalent to the PUMS '' value
+    if int(num_vehicles) < 3:
+        return str(int(num_vehicles))
+    return '3+'
 
 
 def gender_named(input):
@@ -124,11 +134,13 @@ HOUSEHOLD_INCOME = DataType(
 )
 
 NUM_VEHICLES = DataType(
-    'num_vehicles', 'veh', None, DataCategory.HOUSEHOLD, {'0', '1', '2', '3', '4', '5', '6+'}
+    'num_vehicles', 'veh', num_vehicles_discrete, DataCategory.HOUSEHOLD,
+    {'0', '1', '2', '3+'}
 )
 
 NUM_PEOPLE = DataType(
-    'num_people', 'np', num_people_discrete, DataCategory.HOUSEHOLD, {'0', '1', '2', '3', '4+'}
+    'num_people', 'np', num_people_discrete, DataCategory.HOUSEHOLD,
+    {'1', '2', '3', '4+'}
 )
 
 HOUSEHOLD_WEIGHT = DataType(

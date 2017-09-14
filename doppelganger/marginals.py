@@ -12,7 +12,7 @@ logging.basicConfig(filename='logs', filemode='a', level=logging.INFO)
 
 
 CONTROLS = {
-    'hh_size': {
+    'num_people': {
         'count': [
             'B11016_010E',
             'B11016_003E', 'B11016_011E',
@@ -53,11 +53,17 @@ CONTROLS = {
             'B01001_024E', 'B01001_025E', 'B01001_044E', 'B01001_045E',
             'B01001_046E', 'B01001_047E', 'B01001_048E', 'B01001_049E'
         ],
+    },
+    'num_vehicles': {
+        '0': ['B08141_002E'],  # No vehicle available
+        '1': ['B08141_003E'],  # 1 vehicle available
+        '2': ['B08141_004E'],  # 2 vehicles available
+        '3+': ['B08141_005E'],  # 3 or more vehicles available
     }
 }
 
 
-CONTROL_NAMES = tuple(i for cat in CONTROLS.keys()
+CONTROL_NAMES = tuple('_'.join([cat, i]) for cat in CONTROLS.keys()
                       for i in CONTROLS[cat].keys())
 
 
@@ -71,9 +77,7 @@ class Marginals(object):
         self.data = data
 
     @staticmethod
-    def _fetch_from_census(
-        census_key, field_key_list, tract_key, state_key, county_key
-    ):
+    def _fetch_from_census(census_key, field_key_list, tract_key, state_key, county_key):
         controls_str = ','.join(field_key_list)
         query = ('http://api.census.gov/data/2015/acs5?get={}'
                  '&for=tract:{}&in=state:{}+county:{}&key={}'
@@ -136,7 +140,7 @@ class Marginals(object):
             logging.info('Fetching tract %s', tract_key)
             controls_dict = {}
             success = True
-            for _, control_cat in CONTROLS.items():
+            for cat, control_cat in CONTROLS.items():
                 key_list = [key for sublist in list(
                     control_cat.values()) for key in sublist]
                 try:
@@ -154,15 +158,14 @@ class Marginals(object):
 
                 for sum_key, sum_cat in control_cat.items():
                     counts = sum([int(selected_controls[key]) for key in sum_cat])
-                    controls_dict[sum_key] = counts
+                    controls_dict[cat+'_'+sum_key] = counts
             if success:
                 output = [state_key, county_key, puma_key, tract_key]
                 for control_name in CONTROL_NAMES:
                     output.append(str(controls_dict[control_name]))
                 data.append(output)
 
-        columns = ['STATEFP', 'COUNTYFP', 'PUMA5CE',
-                   'TRACTCE'] + list(CONTROL_NAMES)
+        columns = ['STATEFP', 'COUNTYFP', 'PUMA5CE', 'TRACTCE'] + list(CONTROL_NAMES)
         return Marginals(pandas.DataFrame(data, columns=columns))
 
     @staticmethod
