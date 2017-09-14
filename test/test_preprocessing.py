@@ -6,7 +6,7 @@ from __future__ import (
 
 import unittest
 
-from doppelganger import Preprocessor, inputs
+from doppelganger import Preprocessor
 
 
 class PreprocessingTest(unittest.TestCase):
@@ -20,17 +20,6 @@ class PreprocessingTest(unittest.TestCase):
         }
         preprocessor = Preprocessor.from_config(config)
         preprocess = preprocessor.input_to_preprocessor['test_input']
-        print(preprocessor)
         self.assertEqual(preprocess(0), '<=0')
         self.assertEqual(preprocess(10000), '0-20000')
         self.assertEqual(preprocess(100000), '60000+')
-
-    def test_yyyy_to_age(self):
-        for sample_birthday in [19490301, '19490301', '194903', 194903]:
-            age = inputs.yyyy_to_age(sample_birthday)
-            self.assertEqual(age, 68)
-
-    def test_yyyy_to_age_none(self):
-        for sample_birthday in ['', float('nan')]:
-            age = inputs.yyyy_to_age(sample_birthday)
-            self.assertEqual(age, inputs.UNKNOWN)

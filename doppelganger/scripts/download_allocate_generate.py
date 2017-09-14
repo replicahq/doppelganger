@@ -24,10 +24,10 @@ logging.basicConfig(filename='logs', filemode='a', level=logging.INFO)
 FILE_PATTERN = 'state_{}_puma_{}_{}'
 
 
-def person_segmenter(x): return x[inputs.AGE.name]
+def person_segmenter(x): return None  # x[inputs.AGE.name]
 
 
-def household_segmenter(x): return x[inputs.NUM_PEOPLE.name]
+def household_segmenter(x): return None  # x[inputs.NUM_PEOPLE.name]
 
 
 def parse_args():
