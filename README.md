@@ -16,16 +16,25 @@ If you see a result like `numpy==[version_number]`, you're good to go.
 
 If you don't already have numpy running on your system, we strongly recommend you use a version of python with numpy pre-built.  We recommend [Anaconda](https://www.continuum.io/downloads) but there are [several options](https://www.scipy.org/install.html).
 
-Once you have numpy set up, clone or download this repository, go to the root directory and run
+### Installing for use
+To use simply use the doppelganger package, run
 ```shell
-pip install .
+pip install doppelganger
 ```
-Or for developers
+You should now have doppelganger installed.
+
+### Installing for development
+To develop Doppelganger, once you have numpy set up, clone or download this repository, go to the root directory and run
 ```shell
-pip install ".[tests]"
+pip install .[tests]
+```
+You should now have the local doppelganger code & testing tools installed.
+
+From the repo root, run the tests to confirm everything is working:
+```shell
+nosetests
 ```
 
-You should now have doppelganger installed.
 
 ## Examples
 

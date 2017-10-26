@@ -1,6 +1,6 @@
 machine:
   environment:
-    TESTCMD: 'pip install pip --upgrade && python -V && pip install numpy && pip install .[tests] && flake8 && nosetests --with-coverage -vv'
+    TESTCMD: 'pip install pip --upgrade && python -V && pip install numpy && pip install .[tests] && flake8 --version && flake8 && nosetests --with-coverage -vv'
 
 dependencies:
   override:
