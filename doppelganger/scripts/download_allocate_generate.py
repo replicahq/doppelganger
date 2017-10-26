@@ -210,7 +210,7 @@ def download_tract_data(state_id, puma_id, output_dir, census_api_key, puma_trac
 
     try:  # Already have marginals file
         controls = Marginals.from_csv(marginal_path)
-    except:  # Download marginal data from the Census API
+    except Exception:  # Download marginal data from the Census API
         with builtins.open(puma_tract_mappings) as csv_file:
             csv_reader = csv.DictReader(csv_file)
             marginals = Marginals.from_census_data(

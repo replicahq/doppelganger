@@ -131,7 +131,7 @@ def balance_multi_cvx(hh_table, A, B, w, mu=1000., meta_mu=1000., verbose_solver
     z = cvx.Variable(n_controls, n_tracts)
     q = cvx.Variable(n_controls)
 
-    I = np.ones((n_tracts, 1))
+    identity = np.ones((n_tracts, 1))
 
     solved = False
     while not solved:
@@ -156,7 +156,7 @@ def balance_multi_cvx(hh_table, A, B, w, mu=1000., meta_mu=1000., verbose_solver
             z >= 0,
             q >= 0,
             x * hh_table == cvx.mul_elemwise(A, z.T),
-            cvx.mul_elemwise(A.T, z) * I == cvx.mul_elemwise(B.T, q)
+            cvx.mul_elemwise(A.T, z) * identity == cvx.mul_elemwise(B.T, q)
         ]
 
         prob = cvx.Problem(objective, constraints)

@@ -24,7 +24,7 @@ setup(
     ],
     extras_require={
         'tests': [
-            'flake8>=2.5.4',
+            'flake8>=3.5.0',
             'mock>=2.0.0',
             'nose>=1.3.4',
             'coveralls>=1.1',
