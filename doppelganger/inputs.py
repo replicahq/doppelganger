@@ -247,6 +247,8 @@ PUMA = DataType('puma', 'puma', str, None, None)
 
 STATE = DataType('state', 'st', str, None, None)
 
+TRAFFIC_ANALYSIS_ZONE = DataType('taz', None, str, None, None)
+
 PUMS_INPUTS = [
     AGE,
     SEX,
