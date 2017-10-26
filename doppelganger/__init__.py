@@ -1,5 +1,6 @@
 # Copyright 2017 Sidewalk Labs | https://www.apache.org/licenses/LICENSE-2.0
 
+from .accuracy import Accuracy
 from .allocation import HouseholdAllocator
 from .bayesnets import SegmentedData, BayesianNetworkModel
 from .config import Configuration
@@ -10,6 +11,6 @@ from .populationgen import Population
 
 # Enumerate exports, to make the linter happy.
 __all__ = [
-    HouseholdAllocator, SegmentedData, BayesianNetworkModel, Configuration,
+    Accuracy, HouseholdAllocator, SegmentedData, BayesianNetworkModel, Configuration,
     PumsData, CleanedData, Marginals, Population, Preprocessor, DirtyDataSource,
 ]

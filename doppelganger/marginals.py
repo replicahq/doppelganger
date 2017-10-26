@@ -87,8 +87,8 @@ class Marginals(object):
             encoded_response = requests.get(query)
             response = encoded_response.json()
         except Exception:
-            print('failed to load marginals for query:\n{}\n'.format(query))
-            print('response:\n{}'.format(encoded_response.text))
+            logging.exception('failed to load marginals for query:\n{}\n'.format(query))
+            logging.exception('response:\n{}'.format(encoded_response.text))
             raise CensusFetchException()
         control_keys = response[0]
         control_counts = response[1]
