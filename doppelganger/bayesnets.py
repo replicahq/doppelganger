@@ -71,7 +71,7 @@ class SegmentedData(object):
 class BayesianNetworkModel(object):
     """A typed Bayesian network model.
 
-    This bayesian network model as a fixed list of nodes passed in at creation.
+    This bayesian network model has a fixed list of nodes passed in at creation.
     It holds a separate network for each user-defined type.
     """
 
@@ -205,7 +205,7 @@ class BayesianNetworkModel(object):
             independent.
 
         Args:
-            input_data (SegmentedData): data whose likelihood to compute
+            training_data (SegmentedData): data whose likelihood to compute
 
         Returns:
             {type -> log likelihood}: The likelihood of the data for each
