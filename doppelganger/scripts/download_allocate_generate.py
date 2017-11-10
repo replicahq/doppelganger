@@ -10,6 +10,7 @@ import os
 
 from doppelganger import (
     inputs,
+    Accuracy,
     CleanedData,
     Configuration,
     HouseholdAllocator,
@@ -209,8 +210,8 @@ def download_tract_data(state_id, puma_id, output_dir, census_api_key, puma_trac
             )
 
     try:  # Already have marginals file
-        controls = Marginals.from_csv(marginal_path)
-    except:  # Download marginal data from the Census API
+        marginals = Marginals.from_csv(marginal_path)
+    except Exception:  # Download marginal data from the Census API
         with builtins.open(puma_tract_mappings) as csv_file:
             csv_reader = csv.DictReader(csv_file)
             marginals = Marginals.from_census_data(
@@ -222,14 +223,13 @@ def download_tract_data(state_id, puma_id, output_dir, census_api_key, puma_trac
             else:
                 logging.info('Writing out marginal file for state: %s, puma: %s', state_id, puma_id)
                 marginals.write(marginal_path)
-        controls = Marginals.from_csv(marginal_path)
 
     '''With the above marginal controls (tract data), the methods in allocation.py
     allocate discrete PUMS households to the subject PUMA.'''
 
     try:
         allocator = HouseholdAllocator.from_cleaned_data(
-                marginals=controls,
+                marginals=marginals,
                 households_data=households_data,
                 persons_data=persons_data
             )
@@ -237,7 +237,7 @@ def download_tract_data(state_id, puma_id, output_dir, census_api_key, puma_trac
         logging.exception('Error Allocating state: %s, puma: %s\n%s', state_id, puma_id, e)
         exit()
 
-    return allocator
+    return marginals, allocator
 
 
 def generate_synthetic_people_and_households(state_id, puma_id, output_dir, allocator,
@@ -262,6 +262,7 @@ def generate_synthetic_people_and_households(state_id, puma_id, output_dir, allo
                 os.path.join(output_dir, FILE_PATTERN.format(state_id, puma_id, 'people.csv')),
                 os.path.join(output_dir, FILE_PATTERN.format(state_id, puma_id, 'households.csv'))
             )
+    return population
 
 
 def is_valid_file(parser, filename):
@@ -305,15 +306,24 @@ def main():
                 person_segmenter, household_segmenter
             )
 
-    allocator = download_tract_data(
+    marginals, allocator = download_tract_data(
                 state_id, puma_id, output_dir, census_api_key, puma_tract_mappings,
                 households_data, persons_data
             )
 
-    generate_synthetic_people_and_households(
+    population = generate_synthetic_people_and_households(
                 state_id, puma_id, output_dir, allocator,
                 person_model, household_model
             )
+
+    accuracy = Accuracy.from_doppelganger(
+                cleaned_data_persons=persons_data,
+                cleaned_data_households=households_data,
+                marginal_data=marginals,
+                population=population
+            )
+    logging.info('Absolute Percent Error for state {}, and puma {}: {}'.format(state_id, puma_id,
+                 accuracy.absolute_pct_error().mean()))
 
 
 if __name__ == '__main__':

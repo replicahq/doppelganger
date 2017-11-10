@@ -143,6 +143,9 @@ nose_stub.py
 # Emacs
 *~
 
+# Vim
+*.swp
+
 # Ctags
 tags
 

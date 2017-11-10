@@ -104,7 +104,7 @@ def num_people_discrete(num_people):
         return str(int(num_people))
     return '4+'
 
-  
+
 def work_status(code):
     ''' Employment status recode (PUMS 2015 code: ESR)
         b .N/A (less than 16 years old)
@@ -172,7 +172,7 @@ def educational_attainment(code):
         return EducationalAttainment.ADVANCED_DEGREE
     return UNKNOWN
 
-  
+
 def num_vehicles_discrete(num_vehicles):
     if is_blank(num_vehicles):
         return '0'  # ACS has no equivalent to the PUMS '' value
@@ -180,7 +180,7 @@ def num_vehicles_discrete(num_vehicles):
         return str(int(num_vehicles))
     return '3+'
 
-  
+
 def gender_named(input):
     if is_blank(input):
         return UNKNOWN
@@ -246,6 +246,8 @@ SERIAL_NUMBER = DataType('serial_number', 'serialno', None, None, None)
 PUMA = DataType('puma', 'puma', str, None, None)
 
 STATE = DataType('state', 'st', str, None, None)
+
+TRAFFIC_ANALYSIS_ZONE = DataType('taz', None, str, None, None)
 
 PUMS_INPUTS = [
     AGE,
