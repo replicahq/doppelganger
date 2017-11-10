@@ -14,7 +14,7 @@ def get_requirements():
 
 setup(
     name="doppelganger",
-    version="0.1.3",
+    version="0.1.4",
     description='Population synthesis library',
     author='Kat Busch, Kael Greco and contributors',
     author_email='doppelganger@sidewalklabs.com',
