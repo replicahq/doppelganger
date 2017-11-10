@@ -10,14 +10,17 @@ from doppelganger import inputs
 
 
 class Population(object):
+    def __init__(self, generated_people, generated_households):
+        self.generated_people = generated_people
+        self.generated_households = generated_households
 
     @staticmethod
     def from_csvs(persons_infile, households_infile):
         """Load generated population from file.
 
         Args:
-            persons_infile (unicode): path to persons csv
-            households_infile (unicode): path to households csv
+            persons_infile (basestring or file like): persons csv file
+            households_infile (basestring or file like): households csv file
 
         Returns:
             Population: generated population
@@ -26,10 +29,6 @@ class Population(object):
         generated_people = pandas.read_csv(persons_infile)
         generated_households = pandas.read_csv(households_infile)
         return Population(generated_people, generated_households)
-
-    def __init__(self, generated_people, generated_households):
-        self.generated_people = generated_people
-        self.generated_households = generated_households
 
     @staticmethod
     def _extract_person_evidence(allocated_rows, fields, segmenter, household_allocator):
