@@ -32,7 +32,7 @@ You should now have the local doppelganger code & testing tools installed.
 
 From the repo root, run the tests to confirm everything is working:
 ```shell
-nosetests
+py.test
 ```
 
 

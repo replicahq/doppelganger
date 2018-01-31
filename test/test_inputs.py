@@ -3,8 +3,10 @@
 from __future__ import (
     absolute_import, division, print_function, unicode_literals
 )
-
+import datetime
 import unittest
+from mock import patch, Mock
+
 
 from doppelganger import inputs
 
@@ -12,9 +14,11 @@ from doppelganger import inputs
 class InputsTest(unittest.TestCase):
 
     def test_yyyy_to_age(self):
-        for sample_birthday in [19490301, '19490301', '194903', 194903]:
-            age = inputs.yyyy_to_age(sample_birthday)
-            self.assertEqual(age, 68)
+        mock_today = datetime.date(2017, 1, 29)
+        with patch('datetime.date', Mock(today=lambda: mock_today)):
+            for sample_birthday in [19490301, '19490301', '194903', 194903]:
+                age = inputs.yyyy_to_age(sample_birthday)
+                self.assertEqual(age, 68)
 
     def test_yyyy_to_age_none(self):
         for sample_birthday in ['', float('nan')]:

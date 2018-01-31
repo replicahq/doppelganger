@@ -67,16 +67,33 @@ class ListBalancerTests(unittest.TestCase):
         ]])
         _, n_controls = hh_table.shape
 
-        expected_weights = np.matrix([
-            [45.],
-            [52.],
-            [65.],
-            [98.]
-        ])
+        # There are multiple possible solutions and the result varies
+        expected_weights_options = (
+            np.matrix([
+                    [39],
+                    [48.5],
+                    [67],
+                    [116.5],
+            ]),
+            np.matrix(
+                [
+                    [30.],
+                    [37.],
+                    [56.],
+                    [158.]
+                ]),
+            np.matrix(
+                [
+                    [45.],
+                    [52.],
+                    [65.],
+                    [98.]
+                ]),
+        )
 
         mu = np.mat([1] * n_controls)
 
-        return (hh_table, A, w, mu, expected_weights)
+        return (hh_table, A, w, mu, expected_weights_options)
 
     def _mock_list_inconsistent(self):
         hh_table = np.mat([
@@ -214,10 +231,12 @@ class ListBalancerTests(unittest.TestCase):
             hh_weights, expected_weights, rtol=0.01, atol=0)
 
     def test_balance_cvx_relaxed(self):
-        hh_table, A, w, mu, expected_weights = self._mock_list_relaxed()
+        hh_table, A, w, mu, expected_weights_options = self._mock_list_relaxed()
         hh_weights, _ = listbalancer.balance_cvx(hh_table, A, w, mu)
-        np.testing.assert_allclose(
-            hh_weights, expected_weights, rtol=0.01, atol=0)
+        self.assertTrue(any(
+            np.allclose(hh_weights, expected_weights, rtol=0.01, atol=0)
+            for expected_weights in expected_weights_options)
+        )
 
     def test_balance_multi_cvx(self):
         hh_table, A, w, mu, expected_weights = self._mock_list_inconsistent()
