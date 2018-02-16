@@ -68,19 +68,19 @@ class MarginalsTest(unittest.TestCase):
             'COUNTYFP': '075',
             'PUMA5CE': '07507',
             'TRACTCE': '023001',
-            'age_0-17': '909',
-            'age_18-34': '1124',
-            'age_65+': '713',
-            'age_35-64': '2334',
-            'num_people_count': '1335',
-            'num_people_1': '168',
-            'num_people_3': '304',
-            'num_people_2': '341',
-            'num_people_4+': '522',
-            'num_vehicles_0': '0',
-            'num_vehicles_1': '1',
-            'num_vehicles_2': '2',
-            'num_vehicles_3+': '3'
+            'age_0-17': 909,
+            'age_18-34': 1124,
+            'age_65+': 713,
+            'age_35-64': 2334,
+            'num_people_count': 1335,
+            'num_people_1': 168,
+            'num_people_3': 304,
+            'num_people_2': 341,
+            'num_people_4+': 522,
+            'num_vehicles_0': 0,
+            'num_vehicles_1': 1,
+            'num_vehicles_2': 2,
+            'num_vehicles_3+': 3
         }
         result = marg.data.loc[0].to_dict()
         self.assertDictEqual(result, expected)

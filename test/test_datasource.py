@@ -35,6 +35,13 @@ class DataSourceTest(unittest.TestCase):
             mock_person('c', '25', '1', '0000000')
         ]
 
+    def _mock_dirty_household_puma_state_input(self):
+        return [
+            {'serialno': 'a', 'puma': '00106', 'st': '06'},
+            {'serialno': 'b', 'puma': '00107', 'st': '06'},
+            {'serialno': 'c', 'puma': '00106', 'st': '07'}
+        ]
+
     def test_clean_data(self):
         pums_data = datasource.PumsData(
             pandas.DataFrame(self._mock_dirty_household_input())
@@ -65,3 +72,17 @@ class DataSourceTest(unittest.TestCase):
             inputs.NUM_PEOPLE.name: '2',
         }
         self.assertDictEqual(actual, expected)
+
+    def test_clean_data_filter_length(self):
+        pums_data = datasource.PumsData(
+            pandas.DataFrame(self._mock_dirty_household_puma_state_input())
+        )
+        field_names = [inputs.SERIAL_NUMBER.name, inputs.STATE.name, inputs.PUMA.name]
+        cleaned = pums_data.clean(field_names, Preprocessor())
+        cleaned_state = pums_data.clean(field_names, Preprocessor(), state='06')
+        cleaned_puma = pums_data.clean(field_names, Preprocessor(), puma='00106')
+        cleaned_both = pums_data.clean(field_names, Preprocessor(), state='06', puma='00106')
+        self.assertEqual(len(cleaned.data), 3)
+        self.assertEqual(len(cleaned_state.data), 2)
+        self.assertEqual(len(cleaned_puma.data), 2)
+        self.assertEqual(len(cleaned_both.data), 1)

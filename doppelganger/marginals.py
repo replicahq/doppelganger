@@ -5,11 +5,13 @@ from __future__ import (
 )
 
 import logging
+import numpy as np
 import pandas
 import requests
 
-logging.basicConfig(filename='logs', filemode='a', level=logging.INFO)
+from pandas.compat import text_type
 
+logging.basicConfig(filename='logs', filemode='a', level=logging.INFO)
 
 CONTROLS = {
     'num_people': {
@@ -62,9 +64,10 @@ CONTROLS = {
     }
 }
 
-
 CONTROL_NAMES = tuple('_'.join([cat, i]) for cat in CONTROLS.keys()
                       for i in CONTROLS[cat].keys())
+
+CENSUS_CODE_COLUMNS = ['STATEFP', 'COUNTYFP', 'PUMA5CE', 'TRACTCE']
 
 
 class CensusFetchException(Exception):
@@ -165,25 +168,44 @@ class Marginals(object):
                     output.append(str(controls_dict[control_name]))
                 data.append(output)
 
-        columns = ['STATEFP', 'COUNTYFP', 'PUMA5CE', 'TRACTCE'] + list(CONTROL_NAMES)
-        return Marginals(pandas.DataFrame(data, columns=columns))
+        control_columns = list(CONTROL_NAMES)
+        marginals_df = pandas.DataFrame(
+            data, columns=CENSUS_CODE_COLUMNS + control_columns)
+        marginals_df[CENSUS_CODE_COLUMNS] = marginals_df[
+            CENSUS_CODE_COLUMNS].astype(text_type)
+        marginals_df[control_columns] = marginals_df[control_columns].astype(
+            int)
+        return Marginals(marginals_df)
 
     @staticmethod
-    def from_csv(infile, state=None, puma=None):
+    def from_csv(infile, state=None, puma=None, dtype=None):
         """Load marginals from file.
 
         Args:
             infile (unicode): path to csv
             state (unicode): state fips code (2-digit)
             puma (unicode): puma code (5-digit)
+            dtype (dict {unicode -> type}): pandas dtype dict, sets for each column label (dict key)
+                 its data type (dict value). Since pandas automatically interprets numbers as
+                 numeric types, columns containing codes (e.g. PUMA and state codes) must be set as
+                 text types to preserve leading zeros.
 
         Returns:
             Marginals: marginals fetched from a csv file
 
         """
-        data = pandas.read_csv(infile)
-        if state is not None and puma is not None:
-            data = data[data['STATEFP'] == int(state) and data['PUMA5CE'] == int(puma)]
+        if dtype is None:
+            dtype = {
+                column: text_type for column in CENSUS_CODE_COLUMNS
+            }
+        data = pandas.read_csv(infile, dtype=dtype)
+        if state is not None or puma is not None:
+            query_index = np.ones(len(data), dtype=bool)
+            if state is not None:
+                query_index &= data['STATEFP'].astype(str) == str(state)
+            if puma is not None:
+                query_index &= data['PUMA5CE'].astype(str) == str(puma)
+            data = data[query_index]
         return Marginals(data)
 
     def write(self, outfile):
