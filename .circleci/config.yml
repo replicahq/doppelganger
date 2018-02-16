@@ -21,6 +21,10 @@ jobs:
             source ~/venv/bin/activate
             flake8
             pytest -v
+            jupyter nbconvert --to script examples/doppelganger_example_simple.ipynb
+            jupyter nbconvert --to script examples/doppelganger_example_full.ipynb
+            cd examples && python doppelganger_example_simple.py && python doppelganger_example_full.py
+
   test-3.6:
     docker:
       - image: circleci/python:3.6
@@ -42,6 +46,9 @@ jobs:
             flake8
             pytest -v --cov=./
             coveralls
+            jupyter nbconvert --to script examples/doppelganger_example_simple.ipynb
+            jupyter nbconvert --to script examples/doppelganger_example_full.ipynb
+            cd examples && python doppelganger_example_simple.py && python doppelganger_example_full.py
 
 workflows:
   version: 2

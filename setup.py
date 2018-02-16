@@ -27,6 +27,7 @@ setup(
             'coveralls>=1.1',
             'pytest',
             'pytest-cov',
+            'jupyter',
         ],
     },
 
