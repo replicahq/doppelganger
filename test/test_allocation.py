@@ -101,15 +101,15 @@ class TestAllocation(unittest.TestCase):
         allocator = HouseholdAllocator.from_cleaned_data(marginals, households_data, persons_data)
         self.assertTrue(allocator)
         expected_shape = (114, 17)
-        self.assertEquals(allocator.allocated_households.shape, expected_shape)
+        self.assertEqual(allocator.allocated_households.shape, expected_shape)
         expected_columns = [
                 u'serial_number', u'num_people', u'num_vehicles', u'household_weight',
                 u'num_people_1', u'num_people_2', u'num_people_3', u'num_vehicles_0',
                 u'num_vehicles_1', u'num_vehicles_2', u'num_vehicles_3+', u'age_0-17',
                 u'age_18-34', u'age_65+', u'age_35-64', u'count', u'tract'
             ]
-        self.assertEquals(set(allocator.allocated_households.columns.tolist()),
-                          set(expected_columns))
+        self.assertEqual(set(allocator.allocated_households.columns.tolist()),
+                         set(expected_columns))
 
     def test_read_from_file(self):
         read_csv = MagicMock(return_value=pandas.DataFrame())

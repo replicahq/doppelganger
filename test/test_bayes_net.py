@@ -215,7 +215,7 @@ class BayesNetTests(unittest.TestCase):
         training_data = bayesnets.SegmentedData.from_data(
             person_training_data, self._person_fields(), segmenter=self._person_segmenter()
         )
-        self.assertEquals(
+        self.assertEqual(
             type(
                 BayesianNetworkModel.train(
                     training_data,
@@ -279,7 +279,7 @@ class BayesNetTests(unittest.TestCase):
             prior_data={('35-64', 'F', '40k+')}
         )
         person = network.generate('one_bucket', ())[0]
-        self.assertEquals(person, ('35-64', 'F', '40k+'))
+        self.assertEqual(person, ('35-64', 'F', '40k+'))
 
     def test_generate_with_prior_non_existing(self):
         network = BayesianNetworkModel.train(
@@ -289,10 +289,10 @@ class BayesNetTests(unittest.TestCase):
             prior_data={('35-64', 'F', '40k+')}
         )
         person = network.generate('one_bucket', ((str('sex'), str('F')),))[0]
-        self.assertEquals(person, ('35-64', 'F', '40k+'))
+        self.assertEqual(person, ('35-64', 'F', '40k+'))
 
         person = network.generate('one_bucket', ((str('sex'), str('M')),))[0]
-        self.assertEquals(person, ('65+', 'M', '40k+'))
+        self.assertEqual(person, ('65+', 'M', '40k+'))
 
     def test_evaluate_network(self):
         people_data = self._mock_people_input()
